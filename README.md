@@ -1,2 +1,3 @@
 # steinberg-signature
-Computational tools to calculate higher-order autocorrelation functions from general graphs
+
+Computing forward and reverse higher-order autocorrelation functions and the area between them from general graphs; quantifying the relationship between this area and the thermodynamic force of a given cycle in a general graph.
