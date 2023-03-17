@@ -29,6 +29,10 @@ from tqdm import tqdm
 from steinberg_utils_3vertex import *
 ```
 
-## Citation
+For an example of how to use the functions in `steinberg_utils_3vertex.py`, see the Jupyter notebook `steinberg_3vertex_official.ipynb`. You may also clone this repository.
+
+`git clone https://github.com/sjhaque14/steinberg-signature`
 
 ## Contact
+
+For more details, please contact Sabina J Haque at sabina_haque@fas.harvard.edu.
