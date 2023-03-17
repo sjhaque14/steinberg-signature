@@ -8,13 +8,13 @@ To investigate the relationship between the Steinberg signature and thermodynami
 
 The following Python3 libraries are used in this library. All of the below can be installed using `pip` or `conda`.
 
-* Numpy
+* [Numpy](https://numpy.org/install/)
 
-* Scipy.linalg
+* [Scipy.linalg](https://scipy.org/install/)
 
-* Matplotlib.pyplot
+* [Matplotlib](https://matplotlib.org/stable/users/installing/index.html)
 
-* Tqdm (optional)
+* [Tqdm](https://pypi.org/project/tqdm/) (optional)
 
 ## Installation
 
