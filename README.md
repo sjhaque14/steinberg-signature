@@ -6,24 +6,20 @@ To investigate the relationship between the Steinberg signature and thermodynami
 
 ## Prerequisites
 
-* Numpy
+The following Python3 libraries are used in this library. All of the below can be installed using `pip` or `conda`.
 
-`import numpy as np`
+* Numpy
 
 * Scipy.linalg
 
-`import scipy.linalg`
-
 * Matplotlib.pyplot
 
-`import matplotlib`
-
-`import matplotlib.pyplot as plt`
-
-* Tqdm
-
-`from tqdm import tqdm`
+* Tqdm (optional)
 
 ## Installation
 
-1. Clone the
+The relevant functions for calculating the Steinberg signature and generating force-area curves are included in the file `steinberg_utils_3vertex.py`. Below is an example of how one might 
+
+## Citation
+
+## Contact
