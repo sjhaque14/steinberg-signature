@@ -6,13 +6,20 @@ To investigate the relationship between the Steinberg signature and thermodynami
 
 ## Prerequisites
 
+
+
 * Numpy
+
+`import numpy as np`
+
 * Scipy.linalg
+
+`import scipy.linalg`
+
 * Matplotlib.pyplot
 
-`import matplotlib
-import matplotlib.pyplot as plt
-`
+`import matplotlib`
+`import matplotlib.pyplot as plt`
 
 * Tqdm
 
