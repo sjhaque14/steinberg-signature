@@ -22,14 +22,11 @@ The relevant functions for calculating the Steinberg signature and generating fo
 
 ```
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import scipy.linalg
-import scipy.signal
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from steinberg_utils_3vertex import *
-
 ```
 
 ## Citation
