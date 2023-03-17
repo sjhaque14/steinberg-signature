@@ -4,6 +4,10 @@ The [**Steinberg signature**](https://www.sciencedirect.com/science/article/pii/
 
 To investigate the relationship between the Steinberg signature and thermodynamic force, we initialize a linear framework graph in an equilibrium steady state. In such a steady state, the thermodynamic force of the system, measured here by the cycle affinity, is equal to 0. The Steinberg signature, measured by the area difference between $G^{\alpha,\beta}$ and $G^{\beta,\alpha}$, is also equal to 0. To increase thermodynamic force, we select a single parameter to perturb from its equilibrium value. Once the system has been driven very far from equilibrium, we plot the area difference against the force of the system. We call the resulting a plot a force-area curve.
 
+The main results are the observations of a non-monotonic relationship between the Steinberg signature and thermodynamic force, as well as how the Steinberg signature asymptotes to 0, the equilibrium value, in the limit of high thermodynamic force.
+
+
+
 ![My Image](3vertex-software-infographic.png)
 
 ## Prerequisites
