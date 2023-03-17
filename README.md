@@ -6,8 +6,6 @@ To investigate the relationship between the Steinberg signature and thermodynami
 
 ## Installation
 
-Steinberg-3vertex requires the following libraries.
-
 ### Software requirements:
 
 * Python3
@@ -16,4 +14,6 @@ Steinberg-3vertex requires the following libraries.
 * Matplotlib.pyplot
 * Tqdm
 
-The relevant software is included in the python file `steinberg_utils_3vertex`. 
+### Instructions
+
+1. Clone the
