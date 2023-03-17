@@ -18,7 +18,19 @@ The following Python3 libraries are used in this library. All of the below can b
 
 ## Installation
 
-The relevant functions for calculating the Steinberg signature and generating force-area curves are included in the file `steinberg_utils_3vertex.py`. Below is an example of how one might 
+The relevant functions for calculating the Steinberg signature and generating force-area curves are included in the file `steinberg_utils_3vertex.py`. 
+
+```
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import scipy.linalg
+import scipy.signal
+from tqdm import tqdm
+
+from steinberg_utils_3vertex import *
+
+```
 
 ## Citation
 
