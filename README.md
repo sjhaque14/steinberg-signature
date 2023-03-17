@@ -29,7 +29,7 @@ from tqdm import tqdm
 from steinberg_utils_3vertex import *
 ```
 
-For an example of how to use the functions in `steinberg_utils_3vertex.py`, see the Jupyter notebook `steinberg_3vertex_official.ipynb`. You may also clone this repository.
+For an example of how to use the functions in `steinberg_utils_3vertex.py`, see the Jupyter notebook `steinberg_3vertex_official.ipynb`. You may also clone this repository to obtain the relevant files.
 
 `git clone https://github.com/sjhaque14/steinberg-signature`
 
