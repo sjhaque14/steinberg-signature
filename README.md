@@ -1,5 +1,7 @@
 Sabina J. Haque
+
 Last updated: Jan 13 2024
+
 Contact: sabina_haque@fas.harvard.edu, sjhaque14@gmail.com
 
 This repository contains the code used for the analysis performed in the upcoming manuscript "Anomalous behaviour of the Steinberg signature for detecting departure from thermodynamic equilibrium". 
