@@ -1,4 +1,16 @@
-# steinberg-signature
+Sabina J. Haque
+Last updated: Jan 13 2024
+Contact: sabina_haque@fas.harvard.edu, sjhaque14@gmail.com
+
+This repository contains the code used for the analysis performed in the upcoming manuscript "Anomalous behaviour of the Steinberg signature for detecting departure from thermodynamic equilibrium". 
+
+The Steinberg signature for detecting departure from thermodynamic equilibrium was introduced by I. Z. Steinberg in the 1986 Biophysical Journal paper ["On the time reversal of noise signals"](https://www.sciencedirect.com/science/article/pii/S000634958683449X?via%3Dihub). It exploits specialized "higher-order" autocorrelation functions to detect time-reversal asymmetry in stochastic signals emitted by an underlying continuous-time Markov process. These higher-order autocorrelation functions take the following form:
+
+$$\mathcal{A}^{\alpha,\beta}(\tau) = \lim_{T \rightarrow 0} \frac{1}{T - \tau}\int_{0}^{T - \tau} f^{\alpha}(t)f^{\beta}(t + \tau) dt.$$
+
+This repository contains code to calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ and its time-reverse $\mathcal{A}^{\beta,\alpha}(\tau)$.
+
+--------------------------------
 
 The [**Steinberg signature**](https://www.sciencedirect.com/science/article/pii/S000634958683449X?via%3Dihub) is a signature of non-equilibrium conditions in Markovian systems. Using higher-order autocorrelation functions of the form $G^{\alpha,\beta}$ and $G^{\beta,\alpha}$, this method allows one to detect whether or not a given system obeys detailed balance. Here, we present computational tools for calculating the Steinberg signature on a 3-state Markov process. We represent Markov processes using a graph-theoretic approach called the [**linear framework**](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0036321), which has been developed by the Gunawardena lab to model time-scale separation in biochemical systems. Specifically, for a linear framework graph $G$ with any given parameterization, we want to be able to calculate the Steinberg signature and determine how it varies in response to increasing thermodynamic force of the underlying system.
 
