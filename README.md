@@ -6,7 +6,12 @@ The Steinberg signature for detecting departure from thermodynamic equilibrium w
 
 $$\mathcal{A}^{\alpha,\beta}(\tau) = \lim_{T \rightarrow 0} \frac{1}{T - \tau}\int_{0}^{T - \tau} f^{\alpha}(t)f^{\beta}(t + \tau) dt.$$
 
-This repository contains code to calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ and its time-reverse $\mathcal{A}^{\beta,\alpha}(\tau)$ for any continuous time, finite space, time-homogeneous Markov process. We represent Markov processes using the [**linear framework**](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0036321), a graph-theoretic approach to modeling biochemical networks at steady-state.
+This repository contains code to calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ and its time-reverse $\mathcal{A}^{\beta,\alpha}(\tau)$ for any continuous time, finite space, time-homogeneous Markov process. We represent Markov processes using finite, directed, labeled graphs $G$, as defined by the [**linear framework**](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0036321), a graph-theoretic approach to modeling biochemical networks at steady-state. The code included in this repository enables the user to accomplish the following:
+
+* Calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ and its time-reverse $\mathcal{A}^{\beta,\alpha}(\tau)$ for any continuous time, finite space, time-homogeneous Markov process.
+* Calculate $$\cal I$^{\alpha,\beta}(G) = = \int_{0}^{\infty} \left(\A^{\alpha,\beta}(\tau) - A^{\beta,\alpha}(\tau)\right) d\tau$ as a function of the cycle affinity of the 3-vertex graph $\tilde{A}(C) = \ln{\left ( \dfrac{ade}{bfc} \right )}$ as a single edge label is driven further and further from its equilibrium value (i.e. for which $\tilde{A}(C) = 0$).
+*
+*
 
 ![My Image](3vertex-software-infographic.png)
 
