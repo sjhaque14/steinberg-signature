@@ -1,3 +1,5 @@
+## Overview
+
 This repository contains the code used to perform quantiative analysis in the upcoming manuscript "Anomalous behaviour of the Steinberg signature for detecting departure from thermodynamic equilibrium". 
 
 The Steinberg signature for detecting departure from thermodynamic equilibrium was introduced by I. Z. Steinberg in the 1986 Biophysical Journal paper ["On the time reversal of noise signals"](https://www.sciencedirect.com/science/article/pii/S000634958683449X?via%3Dihub). It exploits specialized "higher-order" autocorrelation functions to detect time-reversal asymmetry in stochastic signals emitted by an underlying continuous-time Markov process. These higher-order autocorrelation functions take the following form:
