@@ -127,9 +127,7 @@ def cycle_affinity_K(params):
     
     return affinity
 
-#########################################################################################################################################################################################
-# Functions calculating the higher order autocorrelation functions
-#########################################################################################################################################################################################
+## HIGHER-ORDER AUTOCORRELATION FUNCTIONS ##
 
 def autocorrelation_analytical(signal,L,tau,alpha=1,beta=3):
     """
@@ -140,52 +138,47 @@ def autocorrelation_analytical(signal,L,tau,alpha=1,beta=3):
     Parameters
     ----------
     signal : 1D array
-        possible values of signal (which is a state function on the Markov process)
+        vector of possible values of signal S(1), S(2), S(3)
         
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
     
     tau : 1D array
-        range of intervals between values of signal taken by system
+        range of intervals between values of signal along integration interval
     
-    alpha : scalar
-        exponent applied to signal
-    
-    beta : scalar
-        exponent applied to transpose of signal
+    alpha, beta : scalar
+        exponents applied to signal
     
     Returns
     -------
-    t : 1D array
+    a_13 : 1D array
         forward autocorrelation function values
     
-    t_rev : 1D array
+    a_31 : 1D array
         reverse autocorrelation function values
     
     """
-    f = np.array([signal],dtype=np.float128)
-    fstar = f.T
+    s = np.array([signal],dtype=np.float128) # row vector
+    s_t = s.T # column vector
     
-    # calculate the stationary distribution of the Markov process
+    # calculate the steady-state probability distribution of K
     eigvals, eigvecs = scipy.linalg.eig(L)
     pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
     
     # initialize forward and reverse autocorrelation function arrays
-    t = np.zeros(len(tau),dtype=np.float128)
-    t_rev = np.zeros(len(tau),dtype=np.float128)
+    a_13 = np.zeros(len(tau),dtype=np.float128)
+    a_31 = np.zeros(len(tau),dtype=np.float128)
     
     list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
     
     # populate arrays with analytical solution to autocorrelation function
     for i in range(len(tau)):
-        t[i] = f**alpha @ list_result[i] @(fstar ** beta * pi)
-        t_rev[i] = f**beta @ list_result[i] @(fstar ** alpha * pi)
+        a_13[i] = s**beta @ list_result[i] @(s_t ** alpha * pi)
+        a_31[i] = s**alpha @ list_result[i] @(s_t ** beta * pi)
         
-    return t, t_rev
+    return a_13, a_31
 
-#########################################################################################################################################################################################
-# Functions calculating the Steinberg signature (area between higher-order autocorrelation functions)
-#########################################################################################################################################################################################
+## THE STEINBERG SIGNATURE ##
 
 def numerical_area(t,t_rev):
     """
@@ -372,96 +365,3 @@ def analytical_area(lambda_2, lambda_3, u_1, u_2, v_2, u_3, v_3, f, alpha=1, bet
     area_ab = np.abs(((coefficient_2ba - coefficient_2ab)/lambda_2.real) + ((coefficient_3ba - coefficient_3ab)/lambda_3.real))
     
     return area_ab, coefficient_2ab, coefficient_2ba, coefficient_3ab, coefficient_3ba, term_1, term_2
-
-def force_area(params, f, alpha=1, beta=3, N=1000):
-    """
-    Computes a force-area curve for a given inital equilibrium paramterization of the 3-vertex graph.
-    
-    Parameters
-    ----------
-    
-    params : 1D array
-        parameter values of rate constants in 3-vertex graph K
-        params = [a,b,d,c,f,e] = [0,1,2,3,4,5]
-    
-    f : 1D array
-        possible values of signal (which is a state function on the Markov process)
-    
-    alpha : scalar (default = 1)
-        exponent applied to signal
-    
-    beta : scalar (default = 3)
-        exponent applied to transpose of signal
-        
-    N : integer (default = 1000)
-        number of times a particular parameter is perturbed 
-    
-    Returns
-    ----------
-    
-    forces : 1D array
-        values of thermodynamic force of the system as it is perturbed from equilibrium
-    
-    areas : 1D array
-        list of areas computed via the Steinberg signature for each perturbation
-    
-    param_choice : integer
-        index of parameter chosen to perturb from equilibrium
-    
-    param_changes : 1D array
-        list of parameter values assumed by the perturbed parameter
-        
-    initial_params : 1D array
-        equilibrium parameters for the system
-    
-    """
-    
-    forces = np.zeros(N)
-    areas = np.zeros(N)
-    param_changes = np.zeros(N)
-    initial_params = params
-    
-    # select a paramter to perturb from equilibrium
-    param_choice = np.random.choice(np.arange(0,5))
-
-    for i in range(0,N):
-        
-        # record the value of the chosen parameter
-        param_changes[i] = params[param_choice]
-        
-        # record the thermodynamic force of the system
-        forces[i] = cycle_affinity_3state(params)
-        
-        # compute the Laplacian for the current parameter set
-        L = Laplacian_3state(params)
-        
-        # obtain the spectrum of the Laplacian
-        lambda_1, u_1, v_1, lambda_2, u_2, v_2, lambda_3, u_3, v_3 = Laplacian_spectrum(L)
-        
-        # compute the closed form area
-        areas[i] = analytical_area(lambda_2, lambda_3, u_1, u_2, v_2, u_3, v_3, f, alpha=1, beta=3)
-        
-        # perturb the chosen parameter
-        params[param_choice] = params[param_choice]*1.01
-    
-    return forces, areas, param_choice, param_changes, initial_params
-
-def is_noisy(array):
-    """
-    Determines if the values in an array are noisy.
-    
-    Args:
-        array: The array to be checked. 
-    Returns:
-        True if the values in the array are noisy, False otherwise.
-    """
-    # Calculate the standard deviation of the array.
-    stddev = np.std(array)
-    # Calculate the mean of the array.
-    mean = np.mean(array)
-    # Check if the standard deviation is greater than a certain threshold.
-    # This threshold can be adjusted to control how sensitive the function is to noise.
-    if stddev > 0.1:
-        return True
-    else:
-        return False
