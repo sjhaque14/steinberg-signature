@@ -3,13 +3,13 @@ import scipy.linalg
 
 # steinberg_utils_3vertex.py
 
-# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homnogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph, K, in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, and Gunawardena 2024.
+# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homnogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph, K, in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, Gunawardena 2024.
 
 ## PARAMETER SAMPLING ##
 
 # Sampling parameter values for the 3-vertex graph, K. Parameters are sampled logarithmically from the range (10^{-3}, 10^3). Here, we provide a function for randomly sampling parameters that satisfy detailed balance and one for which the parameters need not satisfy detailed balance.
 
-# See Figure 1A. in Haque, Cetiner, and Gunawardena 2024 for symbolic edge label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
+# See Figure 1A. in Haque, Cetiner, Gunawardena 2024 for symbolic edge label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
 
 def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
@@ -32,11 +32,10 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
     params = np.zeros(num_params,dtype=np.float128)
     
-    # choose the first 5 parameters at random
+    # randomly sample the first 5 parameters
     params[:-1] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
     
-    # allow the 6th parameter (params_31) to be a free parameter
-    # back-calculated with the cycle condition from the 3-vertex graph
+    # allow the 6th parameter (e = params_31) to be a free parameter
     params[-1] = (params[1]*params[3]*params[4])/(params[0]*params[2])
                        
     return params
@@ -67,7 +66,6 @@ def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
         vals = 10**(np.random.uniform(min_val,max_val, size = num_params))
 
         # double check that the parameters don't accidentally satisfy detailed balance
-        
         forward = vals[0]*vals[2]*vals[5]
         reverse = vals[1]*vals[3]*vals[4]
         
@@ -78,7 +76,7 @@ def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
 
 ## LAPLACIAN MATRIX ##
 
-# See Figure 1B. in Haque, Cetiner, and Gunawardena 2024 for the Laplacian matrix of the 3-vertex graph K.
+# See Figure 1B. in Haque, Cetiner, Gunawardena 2024 for the Laplacian matrix of the 3-vertex graph K.
 
 def Laplacian_K(params):
     """
@@ -102,7 +100,7 @@ def Laplacian_K(params):
 
 ## CYCLE AFFINITY ##
 
-# See equation 15 in Haque, Cetiner, and Gunawardena 2024. For the 3-vertex graph K, A(C) = ln(ade/bfc).
+# See equation 15 in Haque, Cetiner, Gunawardena 2024. For the 3-vertex graph K, A(C) = ln(ade/bfc).
 
 def cycle_affinity_K(params):
     """
@@ -129,60 +127,11 @@ def cycle_affinity_K(params):
     
     return affinity
 
-## RANGE OF TAU ##
-
-# 
-
-def tau_check(L, signal, start_0=0.01,stop_0=2.0,step_0=0.01):
-    """
-    Determines a range of tau values for a particular set of parameters for an 3-vertex graph K
-    
-    Parameters
-    ----------
-
-    L : 3x3 array
-        column-based Laplacian matrix of 3-vertex linear framework graph
-    
-    signal : 1D array
-        possible values of signal (which is a state function on the Markov process)
-        
-    start_0 : scalar (default = 0.01)
-        initial start value of the tau array
-    
-    stop_0 : scalar (default = 2.0)
-        initial stop value of the tau array
-    
-    step_0 : scalar (default = 0.01)
-        initial step value of the tau array
-    
-    Returns
-    -------
-    tau_n : 1D array
-        range of intervals between values of signal assumed by system
-        
-    t : 1D array
-        forward autocorrelation function values
-        
-    t_rev : 1D array
-        reverse autocorrelation function values
-    """
-    
-    stop = stop_0
-    tau_n = np.arange(start_0,stop_0,step=step_0)
-    t, t_rev = autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3)
-    
-    while round(t[-1], 10) != round(t[-2], 10):
-        stop = stop + 10
-        tau_n = np.arange(start_0,stop,step=step_0)
-        t, t_rev = autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3)
-    
-    return tau_n, t, t_rev
-
 #########################################################################################################################################################################################
 # Functions calculating the higher order autocorrelation functions
 #########################################################################################################################################################################################
 
-def autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3):
+def autocorrelation_analytical(signal,L,tau,alpha=1,beta=3):
     """
     Calculates the analytical solution for forward and reverse higher-order autocorrelation functions for a particular Laplacian matrix using the following formula (in LaTeX):
     
@@ -196,7 +145,7 @@ def autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3):
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
     
-    tau_n : 1D array
+    tau : 1D array
         range of intervals between values of signal taken by system
     
     alpha : scalar
@@ -222,13 +171,13 @@ def autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3):
     pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
     
     # initialize forward and reverse autocorrelation function arrays
-    t = np.zeros(len(tau_n),dtype=np.float128)
-    t_rev = np.zeros(len(tau_n),dtype=np.float128)
+    t = np.zeros(len(tau),dtype=np.float128)
+    t_rev = np.zeros(len(tau),dtype=np.float128)
     
-    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau_n))
+    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
     
     # populate arrays with analytical solution to autocorrelation function
-    for i in range(len(tau_n)):
+    for i in range(len(tau)):
         t[i] = f**alpha @ list_result[i] @(fstar ** beta * pi)
         t_rev[i] = f**beta @ list_result[i] @(fstar ** alpha * pi)
         
@@ -248,7 +197,7 @@ def numerical_area(t,t_rev):
         possible values of signal (which is a state function on the Markov process)
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
-    tau_n : 1D array
+    tau : 1D array
         range of intervals between values of signal taken by system
     alpha : scalar
         exponent applied to signal
