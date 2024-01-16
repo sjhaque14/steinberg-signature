@@ -1,16 +1,15 @@
 import numpy as np
 import scipy.linalg
 
-# steinberg-utils.py
+# steinberg_utils_3vertex.py
 
-# This library allows the user to calculate the Steinberg signature for a 3-vertex linear framework graph given any parameterization and test its sensitivity to increasing thermodynamic foce. The result of this investigation produces what we call force-area curves.
+# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homnogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, and Gunawardena 2024.
 
-# PARAMETER SAMPLING
+## PARAMETER SAMPLING ##
 
-# Determine initial parameters for the 3-vertex graph. This is done logarithmically by sampling from 10^-3, 10^3. Functions for paramter sets that satisfy detailed balance (equilibrium) and those that don't (non-equilibrium) included.
+# Sampling parameter values for the 3-vertex graph. Parameters are sampled logarithmically from the range (10^{-3}, 10^3). Here, we provide a function for randomly sampling parameters that satisfy detailed balance and one for which the parameters need not satisfy detailed balance.
 
-# Parameter order: w_12, w_21, w_23, w_32, w_13, w_31 = a, b, d, c, f, e
-# Index order: omegas[0], omegas[1], omegas[2], omegas[3], omegas[4], omegas[5]
+# See Figure 1. in Haque, Cetiner, and Gunawardena 2024 for label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
 
 def log_eqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
     """
@@ -27,9 +26,9 @@ def log_eqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
         
     Returns
     -------
-    omegas : 1D array
+    params : 1D array
              parameter values in 3-state Markov process that satisfy the cycle condition
-             order of parameters: w_12, w_21, w_23, w_32, w_13, w_31 = a, b, d, c, f, e = omegas[0], omegas[1], omegas[2], omegas[3], omegas[4], omegas[5]
+             order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     omegas = np.zeros(num_params,dtype=np.float128)
     
