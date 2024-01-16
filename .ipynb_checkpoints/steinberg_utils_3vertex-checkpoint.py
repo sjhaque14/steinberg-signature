@@ -3,13 +3,13 @@ import scipy.linalg
 
 # steinberg_utils_3vertex.py
 
-# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homnogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, and Gunawardena 2024.
+# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homnogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph, K, in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, and Gunawardena 2024.
 
 ## PARAMETER SAMPLING ##
 
-# Sampling parameter values for the 3-vertex graph. Parameters are sampled logarithmically from the range (10^{-3}, 10^3). Here, we provide a function for randomly sampling parameters that satisfy detailed balance and one for which the parameters need not satisfy detailed balance.
+# Sampling parameter values for the 3-vertex graph, K. Parameters are sampled logarithmically from the range (10^{-3}, 10^3). Here, we provide a function for randomly sampling parameters that satisfy detailed balance and one for which the parameters need not satisfy detailed balance.
 
-# See Figure 1. in Haque, Cetiner, and Gunawardena 2024 for label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
+# See Figure 1A. in Haque, Cetiner, and Gunawardena 2024 for symbolic edge label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
 
 def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
@@ -20,14 +20,14 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     min_val : scalar
         minimum value of sampling range (10^min_val)
     max_val : scalar
-        maximum value of sampling range (10^min_val)
+        maximum value of sampling range (10^max_val)
     num_params: integer
         number of rate constants in the Markov process (default=6)
         
     Returns
     -------
     params : 1D array
-             parameter values in 3-state Markov process that satisfy the cycle condition
+             parameter values in 3-vertex graph that satisfy the cycle condition
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     params = np.zeros(num_params,dtype=np.float128)
@@ -63,84 +63,79 @@ def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     
     while params.size == 0:
                 
-        # choose 6 random parameters logarithmically
+        # randomly sample (num_params) parameters
         vals = 10**(np.random.uniform(min_val,max_val, size = num_params))
 
-        # calculate the forward and reverse cycle products
+        # double check that the parameters don't accidentally satisfy detailed balance
+        
         forward = vals[0]*vals[2]*vals[5]
         reverse = vals[1]*vals[3]*vals[4]
         
-        # if they don't satisfy detailed balance (fat chance), let them be the params
         if (forward != reverse) and (reverse != 0):
             params = vals
     
     return params
 
-#########################################################################################################################################################################################
-# Functions to calculate the Laplacian matrix from a given set of parameters
-#########################################################################################################################################################################################
+## LAPLACIAN MATRIX ##
 
-def Laplacian_3state(omegas):
+# See Figure 1B. in Haque, Cetiner, and Gunawardena 2024 for the Laplacian matrix of the 3-vertex graph K.
+
+def Laplacian_K(params):
     """
-    Calculates the Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
-    
-    L_{ij}(G) = e_{ij} if i \neq j
-    L_{ij}(G) = -\sum_{v \neq j} e_{vj} if i = j.
+    Calculates the Laplacian matrix for the 3-vertex graph K.
     
     Parameters
     ----------
-    omegas : 1D array
-             parameter values of rate constants in 3-state Markovian system
-             omegas = [a,b,d,c,f,e] = [0,1,2,3,4,5]
-        
+    params : 1D array
+             parameter values of rate constants in 3-vertex graph K
+             params = [a,b,d,c,f,e]
+    
     Returns
     -------
     L : 3x3 array
-        column-based Laplacian matrix of 3-state Markovian system
+        column-based Laplacian matrix of 3-vertex graph K
     """
     
-    L = np.array([[-(omegas[0]+omegas[4]), omegas[1], omegas[5]], [omegas[0], -(omegas[1]+omegas[2]), omegas[3]], [omegas[4], omegas[2], -(omegas[5]+omegas[3])]],dtype=np.float128)
+    L = np.array([[-(params[0]+params[4]), params[1], params[5]], [params[0], -(params[1]+params[2]), params[3]], [params[4], params[2], -(params[5]+params[3])]],dtype=np.float128)
     
     return L
 
-#########################################################################################################################################################################################
-# Functions calculating the affinity from a set of parameters.
-#########################################################################################################################################################################################
+## CYCLE AFFINITY ##
 
-def cycle_affinity_3state(omegas):
+# See equation 15 in Haque, Cetiner, and Gunawardena 2024. For the 3-vertex graph K, A(C) = ln(ade/bfc).
+
+def cycle_affinity_K(params):
     """
-    Calculates the cycle affinity (or the thermodynamic force) for a 3-state Markov process using the following mathematical formula:
-    
-    A(C) = log(ade/bfc)
+    Calculates the cycle affinity for a 3-vertex graph K.
     
     Parameters
     ----------
-    omegas : 1D array
-             parameter values of rate constants in 3-state Markovian system
-             omegas = [a,b,d,c,f,e] = [0,1,2,3,4,5]
+    params : 1D array
+             parameter values of rate constants in 3-vertex graph K
+             params = [a,b,d,c,f,e]
              
     Returns
     -------
     affinity : scalar
-               value of the thermodynamic foce of the system
+               cycle affinity
     """
     
     # calculate the forward and reverse cycle products
-    forward = omegas[0]*omegas[2]*omegas[5]
-    reverse = omegas[1]*omegas[3]*omegas[4]
+    forward = params[0]*params[2]*params[5]
+    reverse = params[1]*params[3]*params[4]
     
     # calculate the cycle affinity
     affinity = np.abs(np.log(forward/reverse))
     
     return affinity
 
-#########################################################################################################################################################################################
-# Determine the appropriate tau range
-#########################################################################################################################################################################################
+## RANGE OF TAU ##
 
-def tau_check(L, observable, start_0=0.01,stop_0=2.0,step_0=0.01):
+# 
+
+def tau_check(L, signal, start_0=0.01,stop_0=2.0,step_0=0.01):
     """
-    Determines a range of tau values for a particular set of parameters for an n-state Markov process
+    Determines a range of tau values for a particular set of parameters for an 3-vertex graph K
     
     Parameters
     ----------
@@ -148,8 +143,8 @@ def tau_check(L, observable, start_0=0.01,stop_0=2.0,step_0=0.01):
     L : 3x3 array
         column-based Laplacian matrix of 3-vertex linear framework graph
     
-    observable : 1D array
-        possible values of observable (which is a state function on the Markov process)
+    signal : 1D array
+        possible values of signal (which is a state function on the Markov process)
         
     start_0 : scalar (default = 0.01)
         initial start value of the tau array
@@ -163,7 +158,7 @@ def tau_check(L, observable, start_0=0.01,stop_0=2.0,step_0=0.01):
     Returns
     -------
     tau_n : 1D array
-        range of intervals between values of observable assumed by system
+        range of intervals between values of signal assumed by system
         
     t : 1D array
         forward autocorrelation function values
@@ -174,12 +169,12 @@ def tau_check(L, observable, start_0=0.01,stop_0=2.0,step_0=0.01):
     
     stop = stop_0
     tau_n = np.arange(start_0,stop_0,step=step_0)
-    t, t_rev = autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3)
+    t, t_rev = autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3)
     
     while round(t[-1], 10) != round(t[-2], 10):
         stop = stop + 10
         tau_n = np.arange(start_0,stop,step=step_0)
-        t, t_rev = autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3)
+        t, t_rev = autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3)
     
     return tau_n, t, t_rev
 
@@ -187,7 +182,7 @@ def tau_check(L, observable, start_0=0.01,stop_0=2.0,step_0=0.01):
 # Functions calculating the higher order autocorrelation functions
 #########################################################################################################################################################################################
 
-def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
+def autocorrelation_analytical(signal,L,tau_n,alpha=1,beta=3):
     """
     Calculates the analytical solution for forward and reverse higher-order autocorrelation functions for a particular Laplacian matrix using the following formula (in LaTeX):
     
@@ -195,20 +190,20 @@ def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
     
     Parameters
     ----------
-    observable : 1D array
-        possible values of observable (which is a state function on the Markov process)
+    signal : 1D array
+        possible values of signal (which is a state function on the Markov process)
         
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
     
     tau_n : 1D array
-        range of intervals between values of observable taken by system
+        range of intervals between values of signal taken by system
     
     alpha : scalar
-        exponent applied to observable
+        exponent applied to signal
     
     beta : scalar
-        exponent applied to transpose of observable
+        exponent applied to transpose of signal
     
     Returns
     -------
@@ -219,7 +214,7 @@ def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
         reverse autocorrelation function values
     
     """
-    f = np.array([observable],dtype=np.float128)
+    f = np.array([signal],dtype=np.float128)
     fstar = f.T
     
     # calculate the stationary distribution of the Markov process
@@ -249,16 +244,16 @@ def numerical_area(t,t_rev):
     
     Parameters
     ----------
-    observable : 1D array
-        possible values of observable (which is a state function on the Markov process)
+    signal : 1D array
+        possible values of signal (which is a state function on the Markov process)
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
     tau_n : 1D array
-        range of intervals between values of observable taken by system
+        range of intervals between values of signal taken by system
     alpha : scalar
-        exponent applied to observable
+        exponent applied to signal
     beta : scalar
-        exponent applied to transpose of observable
+        exponent applied to transpose of signal
     
     Returns
     -------
@@ -400,13 +395,13 @@ def analytical_area(lambda_2, lambda_3, u_1, u_2, v_2, u_3, v_3, f, alpha=1, bet
         left eigenvector for the \lambda_3. Normalized such that v_3 * u_3 = 1
     
     f : 1D array
-        possible values of observable (which is a state function on the Markov process)
+        possible values of signal (which is a state function on the Markov process)
     
     alpha : scalar (default = 1)
-        exponent applied to observable
+        exponent applied to signal
     
     beta : scalar (default = 3)
-        exponent applied to transpose of observable
+        exponent applied to transpose of signal
         
     Returns
     -------
@@ -429,25 +424,25 @@ def analytical_area(lambda_2, lambda_3, u_1, u_2, v_2, u_3, v_3, f, alpha=1, bet
     
     return area_ab, coefficient_2ab, coefficient_2ba, coefficient_3ab, coefficient_3ba, term_1, term_2
 
-def force_area(omegas, f, alpha=1, beta=3, N=1000):
+def force_area(params, f, alpha=1, beta=3, N=1000):
     """
     Computes a force-area curve for a given inital equilibrium paramterization of the 3-vertex graph.
     
     Parameters
     ----------
     
-    omegas : 1D array
-        parameter values of rate constants in 3-state Markovian system
-        omegas = [a,b,d,c,f,e] = [0,1,2,3,4,5]
+    params : 1D array
+        parameter values of rate constants in 3-vertex graph K
+        params = [a,b,d,c,f,e] = [0,1,2,3,4,5]
     
     f : 1D array
-        possible values of observable (which is a state function on the Markov process)
+        possible values of signal (which is a state function on the Markov process)
     
     alpha : scalar (default = 1)
-        exponent applied to observable
+        exponent applied to signal
     
     beta : scalar (default = 3)
-        exponent applied to transpose of observable
+        exponent applied to transpose of signal
         
     N : integer (default = 1000)
         number of times a particular parameter is perturbed 
@@ -475,7 +470,7 @@ def force_area(omegas, f, alpha=1, beta=3, N=1000):
     forces = np.zeros(N)
     areas = np.zeros(N)
     param_changes = np.zeros(N)
-    initial_params = omegas
+    initial_params = params
     
     # select a paramter to perturb from equilibrium
     param_choice = np.random.choice(np.arange(0,5))
@@ -483,13 +478,13 @@ def force_area(omegas, f, alpha=1, beta=3, N=1000):
     for i in range(0,N):
         
         # record the value of the chosen parameter
-        param_changes[i] = omegas[param_choice]
+        param_changes[i] = params[param_choice]
         
         # record the thermodynamic force of the system
-        forces[i] = cycle_affinity_3state(omegas)
+        forces[i] = cycle_affinity_3state(params)
         
         # compute the Laplacian for the current parameter set
-        L = Laplacian_3state(omegas)
+        L = Laplacian_3state(params)
         
         # obtain the spectrum of the Laplacian
         lambda_1, u_1, v_1, lambda_2, u_2, v_2, lambda_3, u_3, v_3 = Laplacian_spectrum(L)
@@ -498,7 +493,7 @@ def force_area(omegas, f, alpha=1, beta=3, N=1000):
         areas[i] = analytical_area(lambda_2, lambda_3, u_1, u_2, v_2, u_3, v_3, f, alpha=1, beta=3)
         
         # perturb the chosen parameter
-        omegas[param_choice] = omegas[param_choice]*1.01
+        params[param_choice] = params[param_choice]*1.01
     
     return forces, areas, param_choice, param_changes, initial_params
 
