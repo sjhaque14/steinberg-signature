@@ -11,7 +11,7 @@ import scipy.linalg
 
 # See Figure 1. in Haque, Cetiner, and Gunawardena 2024 for label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
 
-def log_eqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
+def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
     Logarithmically samples equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
     
@@ -30,18 +30,18 @@ def log_eqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
              parameter values in 3-state Markov process that satisfy the cycle condition
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
-    omegas = np.zeros(num_params,dtype=np.float128)
+    params = np.zeros(num_params,dtype=np.float128)
     
     # choose the first 5 parameters at random
-    omegas[:-1] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
+    params[:-1] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
     
-    # allow the 6th parameter (omega_31) to be a free parameter
+    # allow the 6th parameter (params_31) to be a free parameter
     # back-calculated with the cycle condition from the 3-vertex graph
-    omegas[-1] = (omegas[1]*omegas[3]*omegas[4])/(omegas[0]*omegas[2])
+    params[-1] = (params[1]*params[3]*params[4])/(params[0]*params[2])
                        
-    return omegas
+    return params
 
-def log_noneqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
+def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
     Logarithmically samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
     
@@ -56,12 +56,12 @@ def log_noneqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
                
     Returns
     -------
-    omegas : 1D array
+    params : 1D array
              non-equilibrium values of parameters in Markovian system
     """
-    omegas = np.array([],dtype=np.float128)
+    params = np.array([],dtype=np.float128)
     
-    while omegas.size == 0:
+    while params.size == 0:
                 
         # choose 6 random parameters logarithmically
         vals = 10**(np.random.uniform(min_val,max_val, size = num_params))
@@ -70,11 +70,11 @@ def log_noneqparamsample_3vertex(min_val=-3,max_val=3,num_params=6):
         forward = vals[0]*vals[2]*vals[5]
         reverse = vals[1]*vals[3]*vals[4]
         
-        # if they don't satisfy detailed balance (fat chance), let them be the omegas
+        # if they don't satisfy detailed balance (fat chance), let them be the params
         if (forward != reverse) and (reverse != 0):
-            omegas = vals
+            params = vals
     
-    return omegas
+    return params
 
 #########################################################################################################################################################################################
 # Functions to calculate the Laplacian matrix from a given set of parameters
