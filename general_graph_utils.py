@@ -193,6 +193,27 @@ def Laplacian_all(edge_list,label_list,node_list):
     
     return L
 
+def steady_state_MTT(L):
+    """
+    Calculates the steady-state distribution for the any linear framework graph by computing the eigenvector associated with eigenvalue 0.
+    
+    Parameters
+    ----------
+    L : num_nodes x num_nodes array
+        the Laplacian matrix of the graph G
+    
+    Returns
+    -------
+    pi : 1D array
+         the steady state distribution for a 3-vertex graph K.
+    
+    """
+    
+    eigvals, eigvecs = np.linalg.eig(L)
+    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
+    
+    return pi
+
 ## WORKING WITH CYCLES OF G ##
 
 def get_cycle_nodes(G_ud):
