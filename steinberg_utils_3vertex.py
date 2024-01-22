@@ -3,7 +3,7 @@ import scipy.linalg
 
 # steinberg_utils_3vertex.py
 
-# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homnogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph, K, in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, Gunawardena 2024.
+# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph, K, in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, Gunawardena 2024.
 
 ## PARAMETER SAMPLING ##
 
@@ -42,7 +42,7 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
 
 def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
-    Logarithmically samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
+    Randomly samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
     
     Parameters
     ----------
