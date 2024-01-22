@@ -5,9 +5,11 @@ import scipy.linalg
 
 # general-graph-utils.py
 
-# This library allows the user to create linear framework graphs (finite, directed graphs with no self-loops and labeled edges), as well as useful data structures containing structural and topological information about the graph. The library also allows a user to obtain thermodynamic information about the graph (e.g. the thermodynamic force of a cycle) and calculate the Steinberg signature. This software was developed using the NetworkX software package. For more information abpout NetworkX, see https://networkx.org/documentation/stable/index.html
+# This library allows the user to greate linear framework graphs (finite, directed graphs with no self-loops and labeled edges). The user can randomly generate a strongly connected and reversible linear framework graph G, calculate its Laplacian matrix and its spectrum, and calculate the Steinberg signature from that matrix. The user can also determine how the Steinberg signature changes as a function of increasing entropy production. This software was developed using the NetworkX software package. For more information abpout NetworkX, see https://networkx.org/documentation/stable/index.html
 
-# Random generation of linear framework graphs
+# Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this 
+
+## RANDOM GENERATION OF LINEAR FRAMEWORK GRAPHS ##
 
 def random_graph(n):
     """
@@ -54,7 +56,7 @@ def random_graph(n):
     
     return G, G_ud
 
-# Obtaining structural information from linear framework graphs
+# OBTAINING STRUCTURAL INFORMATION FROM G ##
 
 def get_nodes(G):
     """
@@ -72,9 +74,7 @@ def get_edges(G):
 
 def get_labels(G):
     """
-    Extracts the label information for each edge in a NetworkX graph object. If G not labeled, labels are logarithmically sampled.
-    
-    Note: works for undirected graph, but if given a choice, better to use a directed graph
+    Extracts the label information for each edge in a NetworkX graph object. If G not labeled, labels are sampled as 10^x, where x is sampled uniformly between -3 and 3. This function works for undirected graph, but if given a choice, better to use a directed graph
     
     Parameters
     ----------
@@ -102,6 +102,8 @@ def get_labels(G):
     label_list = np.fromiter(label_dict.values(), dtype=float)
     
     return label_dict, label_list
+
+## WORKING WITH CYCLES OF G ##
 
 def get_cycle_nodes(G_ud):
     """
