@@ -115,18 +115,16 @@ def steady_state_MTT(params):
     
     """
     
-    rho_1 = 
+    rho_1 = b*c + b*e + d*e
     
-    rho_2 = 
+    rho_2 = a*e + a*c + c*f
     
-    rho_3 = 
+    rho_3 = a*d + b*f + d*f
     
     rho_tot = rho_1 + rho_2 + rho_3
     
+    pi = np.array([rho_1/rho_tot, rho_2/rho_tot, rho_3/rho_tot])
     
-    
-    eigvals, eigvecs = np.linalg.eig(L)
-    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
     return pi
 
 ## CYCLE AFFINITY ##
