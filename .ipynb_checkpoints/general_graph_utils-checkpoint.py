@@ -7,7 +7,7 @@ import scipy.linalg
 
 # This library allows the user to greate linear framework graphs (finite, directed graphs with no self-loops and labeled edges). The user can randomly generate a strongly connected and reversible linear framework graph G, calculate its Laplacian matrix and its spectrum, and calculate the Steinberg signature from that matrix. The user can also determine how the Steinberg signature changes as a function of increasing entropy production. This software was developed using the NetworkX software package. For more information abpout NetworkX, see https://networkx.org/documentation/stable/index.html
 
-# Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this 
+# Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this file require the undirected graph object as an argument (particular the cycle-related functions). For the most part, however, the user can use a directed graph object 
 
 ## RANDOM GENERATION OF LINEAR FRAMEWORK GRAPHS ##
 
@@ -102,6 +102,96 @@ def get_labels(G):
     label_list = np.fromiter(label_dict.values(), dtype=float)
     
     return label_dict, label_list
+
+
+def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
+    """
+    Initializes a graph with a particular parameterization in an equilibrium steady state
+    
+    Parameters
+    ----------
+    
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+    
+    cycle_labels_forward : list of lists
+        updated with new values for certain edges
+        
+    edge_tracker : list of lists
+        list of edges with labels that were changed to initialize the system in an equilibrium steady state
+        
+    label_dict : dictionary
+        keys: edges in G represented as tuple (source,sink), values: edge labels
+        
+    label_list : 1D numpy array
+        list of edge labels in G
+    
+    Returns
+    -------
+    
+    label_dict : dictionary
+        keys: edges in G represented as tuple (source,sink), values: edge labels (updated with equilibrium changes)
+        
+    label_list : 1D numpy array
+        list of edge labels in G (updated with equilibrium changes
+    """
+    
+    num_cycles = len(cycle_list)
+    
+    for i in range(num_cycles):
+        label_dict[edge_tracker[i]] = cycle_labels_forward[i][0]
+        
+    label_list = np.fromiter(label_dict.values(), dtype=float)
+    
+    return label_dict, label_list
+
+# CALCULATING THE LAPLACIAN ##
+
+def Laplacian_all(edge_list,label_list,node_list):
+    """
+    Calculates the Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
+    
+    L_{ij}(G) = e_{ij} if i \neq j
+    L_{ij}(G) = -\sum_{v \neq j} e_{vj} if i = j.
+    
+    Parameters
+    ----------
+    edge_list : 1D array
+        list of each edge in the graph object G, each element is a tuple (source,sink)
+    
+    label_list : 1D array
+        list of edge labels in the graph
+        
+    node_list : 1D array
+        list of nodes in the graph
+    
+    Returns
+    -------
+    
+    L : num_nodes x num_nodes array
+        the Laplacian matrix of the graph G
+        
+    """
+    
+    num_nodes = len(node_list)
+    num_edges = len(edge_list)
+    
+    L = np.zeros(shape=(num_nodes,num_nodes),dtype=np.float128)
+    
+    # off-diagonal entries
+    for x in range(num_edges):
+        k = np.around(edge_list[x][0]-1,decimals=5)
+        j = np.around(edge_list[x][1]-1,decimals=5)
+
+        L[k,j] = label_list[x]
+    
+    # diagonal entries
+    sums = np.around(-1*np.sum(L,axis=0), decimals=5)
+
+    for i in range(num_nodes):
+        L[i,i] = sums[i]
+    
+    return L
 
 ## WORKING WITH CYCLES OF G ##
 
@@ -306,95 +396,6 @@ def initial_equilibrium_parameters(cycle_list,cycle_edges_forward,cycle_labels_f
                 edge_tracker.append(cycle_edges_forward[i][j])
     
     return cycle_labels_forward, edge_tracker
-
-def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
-    """
-    Initializes a graph with a particular parameterization in an equilibrium steady state
-    
-    Parameters
-    ----------
-    
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
-    
-    cycle_labels_forward : list of lists
-        updated with new values for certain edges
-        
-    edge_tracker : list of lists
-        list of edges with labels that were changed to initialize the system in an equilibrium steady state
-        
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels
-        
-    label_list : 1D numpy array
-        list of edge labels in G
-    
-    Returns
-    -------
-    
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels (updated with equilibrium changes)
-        
-    label_list : 1D numpy array
-        list of edge labels in G (updated with equilibrium changes
-    """
-    
-    num_cycles = len(cycle_list)
-    
-    for i in range(num_cycles):
-        label_dict[edge_tracker[i]] = cycle_labels_forward[i][0]
-        
-    label_list = np.fromiter(label_dict.values(), dtype=float)
-    
-    return label_dict, label_list
-
-# Calculate the Laplacian matrix of linear framework graphs
-
-def Laplacian_all(edge_list,label_list,node_list):
-    """
-    Calculates the Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
-    
-    L_{ij}(G) = e_{ij} if i \neq j
-    L_{ij}(G) = -\sum_{v \neq j} e_{vj} if i = j.
-    
-    Parameters
-    ----------
-    edge_list : 1D array
-        list of each edge in the graph object G, each element is a tuple (source,sink)
-    
-    label_list : 1D array
-        list of edge labels in the graph
-        
-    node_list : 1D array
-        list of nodes in the graph
-    
-    Returns
-    -------
-    
-    L : num_nodes x num_nodes array
-        the Laplacian matrix of the graph G
-        
-    """
-    
-    num_nodes = len(node_list)
-    num_edges = len(edge_list)
-    
-    L = np.zeros(shape=(num_nodes,num_nodes),dtype=np.float128)
-    
-    # off-diagonal entries
-    for x in range(num_edges):
-        k = np.around(edge_list[x][0]-1,decimals=5)
-        j = np.around(edge_list[x][1]-1,decimals=5)
-
-        L[k,j] = label_list[x]
-    
-    # diagonal entries
-    sums = np.around(-1*np.sum(L,axis=0), decimals=5)
-
-    for i in range(num_nodes):
-        L[i,i] = sums[i]
-    
-    return L
 
 # Calculate the Steinberg signature from linear framework graphs
 
