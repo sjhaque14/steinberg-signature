@@ -98,6 +98,37 @@ def Laplacian_K(params):
     
     return L
 
+def steady_state_MTT(params):
+    """
+    Calculates the steady-state distribution for the 3-vertex graph K using the linear framework and the Matrix-Tree Theorem.
+    
+    Parameters
+    ----------
+    params : 1D array
+             parameter values of rate constants in 3-vertex graph K
+             params = [a,b,d,c,f,e]
+    
+    Returns
+    -------
+    pi : 1D array
+         the steady state distribution for a 3-vertex graph K.
+    
+    """
+    
+    rho_1 = 
+    
+    rho_2 = 
+    
+    rho_3 = 
+    
+    rho_tot = rho_1 + rho_2 + rho_3
+    
+    
+    
+    eigvals, eigvecs = np.linalg.eig(L)
+    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
+    return pi
+
 ## CYCLE AFFINITY ##
 
 # See equation 15 in Haque, Cetiner, Gunawardena 2024. For the 3-vertex graph K, A(C) = ln(ade/bfc).

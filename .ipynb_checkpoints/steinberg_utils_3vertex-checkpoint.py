@@ -42,7 +42,7 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
 
 def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
-    Logarithmically samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
+    Randomly samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
     
     Parameters
     ----------
@@ -97,6 +97,37 @@ def Laplacian_K(params):
     L = np.array([[-(params[0]+params[4]), params[1], params[5]], [params[0], -(params[1]+params[2]), params[3]], [params[4], params[2], -(params[5]+params[3])]],dtype=np.float128)
     
     return L
+
+def steady_state_MTT(params):
+    """
+    Calculates the steady-state distribution for the 3-vertex graph K using the linear framework and the Matrix-Tree Theorem.
+    
+    Parameters
+    ----------
+    params : 1D array
+             parameter values of rate constants in 3-vertex graph K
+             params = [a,b,d,c,f,e]
+    
+    Returns
+    -------
+    pi : 1D array
+         the steady state distribution for a 3-vertex graph K.
+    
+    """
+    
+    rho_1 = 
+    
+    rho_2 = 
+    
+    rho_3 = 
+    
+    rho_tot = rho_1 + rho_2 + rho_3
+    
+    
+    
+    eigvals, eigvecs = np.linalg.eig(L)
+    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
+    return pi
 
 ## CYCLE AFFINITY ##
 
