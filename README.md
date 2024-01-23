@@ -12,7 +12,7 @@ This repository contains code to calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ an
 * Calculate $\mathcal{I}^{\alpha,\beta}(G) = \int_{0}^{\infty} \left(\mathcal{A}^{\alpha,\beta}(\tau) - \mathcal{A}^{\beta,\alpha}(\tau)\right) d\tau$ as a function of the cycle affinity of the 3-vertex graph $\tilde{A}(C) = \ln{\left ( \dfrac{ade}{bfc} \right )}$ (see edge label assignments in the figure below) as a single edge label is driven further and further from its equilibrium value (i.e. for which $\tilde{A}(C) = 0$).
 
 
-![My Image](3vertex-software-infographic.png)
+![My Image](figure_si.png)
 
 ## Prerequisites
 
