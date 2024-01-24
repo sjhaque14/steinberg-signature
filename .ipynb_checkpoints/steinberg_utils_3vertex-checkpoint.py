@@ -151,9 +151,16 @@ def cycle_affinity_K(params):
                cycle affinity
     """
     
+    a = params[0]
+    b = params[1]
+    d = params[2]
+    c = params[3]
+    f = params[4]
+    e = params[5]
+    
     # calculate the forward and reverse cycle products
-    forward = params[0]*params[2]*params[5]
-    reverse = params[1]*params[3]*params[4]
+    forward = a*d*e
+    reverse = b*c*f
     
     # calculate the cycle affinity
     affinity = np.abs(np.log(forward/reverse))
