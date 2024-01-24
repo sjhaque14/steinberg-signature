@@ -209,7 +209,7 @@ def steady_state_spectrum(L):
     
     """
     
-    eigvals, eigvecs = np.linalg.eig(L)
+    eigvals, eigvecs = scipy.linalg.eig(L)
     pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
     
     return pi
