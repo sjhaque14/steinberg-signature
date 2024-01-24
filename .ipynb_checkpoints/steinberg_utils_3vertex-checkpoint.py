@@ -3,7 +3,7 @@ import scipy.linalg
 
 # steinberg_utils_3vertex.py
 
-# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homogeneous Markov process). Much of the code in this file is designed with the 3-vertex graph, K, in mind, as the analysis was primarily performed for this specific system. For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, Gunawardena 2024.
+# This library allows the user to compute higher-order autocorrelation functions and the Steinberg signature for any linear framework graph (which represent continuous-time, finite-state, time-homogeneous Markov process). For relevant mathematical details, please refer to the accompanying manuscript Haque, Cetiner, Gunawardena 2024. The code in this file is designed with the 3-vertex graph, K, as our analysis was primarily performed for this system. That being said, some of the functions in this library are able to be used on linear framework graphs of any size. For code optimized for handling general graphs, please see the library `general_graphs.py`. 
 
 ## PARAMETER SAMPLING ##
 
@@ -27,7 +27,7 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     Returns
     -------
     params : 1D array
-             transition rates in the 3-vertex graph satisfy the cycle condition
+             transition rates in the 3-vertex graph K satisfy the cycle condition
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     params = np.zeros(num_params,dtype=np.float128)
@@ -56,7 +56,7 @@ def random_parameters(min_val=-3,max_val=3,num_params=6):
     Returns
     -------
     params : 1D array
-             transition rates in the 3-vertex graph
+             transition rates in the 3-vertex graph K
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     
@@ -66,7 +66,7 @@ def random_parameters(min_val=-3,max_val=3,num_params=6):
     
     return params
 
-## LAPLACIAN MATRIX ##
+## LAPLACIAN MATRIX & STEADY STATE DISTRIBUTION ##
 
 # See Figure 1B. in Haque, Cetiner, Gunawardena 2024 for the Laplacian matrix of the 3-vertex graph K.
 
@@ -77,16 +77,22 @@ def Laplacian_K(params):
     Parameters
     ----------
     params : 1D array
-             parameter values of rate constants in 3-vertex graph K
-             params = [a,b,d,c,f,e]
+             transition rates in the 3-vertex graph K
+             order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     
     Returns
     -------
     L : 3x3 array
         column-based Laplacian matrix of 3-vertex graph K
     """
+    a = params[0]
+    b = params[1]
+    d = params[2]
+    c = params[3]
+    f = params[4]
+    e = params[5]
     
-    L = np.array([[-(params[0]+params[4]), params[1], params[5]], [params[0], -(params[1]+params[2]), params[3]], [params[4], params[2], -(params[5]+params[3])]],dtype=np.float128)
+    L = np.array([[-(a+f), b, e], [a, -(b+d), c], [f, d, -(e+c)]],dtype=np.float128)
     
     return L
 
@@ -106,6 +112,12 @@ def steady_state_MTT(params):
          the steady state distribution for a 3-vertex graph K.
     
     """
+    a = params[0]
+    b = params[1]
+    d = params[2]
+    c = params[3]
+    f = params[4]
+    e = params[5]
     
     rho_1 = b*c + b*e + d*e
     
