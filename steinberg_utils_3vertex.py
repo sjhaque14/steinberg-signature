@@ -7,27 +7,27 @@ import scipy.linalg
 
 ## PARAMETER SAMPLING ##
 
-# Sampling parameter values for the 3-vertex graph, K. Parameters are sampled logarithmically from the range (10^{-3}, 10^3). Here, we provide a function for randomly sampling parameters that satisfy detailed balance and one for which the parameters need not satisfy detailed balance.
+# Randomly sampling transition rates for the 3-vertex graph, K. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (-3, 3). Here, we provide a function for randomly sampling parameters that satisfy detailed balance and one for which the parameters do not necessarily satisfy detailed balance.
 
-# See Figure 1A. in Haque, Cetiner, Gunawardena 2024 for symbolic edge label assignments. The parameters are listed in the following order: a, b, d, c, f, e.
+# See Figure 1A. in Haque, Cetiner, Gunawardena 2024 for symbolic edge label assignments. The array params lists these edge labels in the following order: a, b, d, c, f, e.
 
 def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
-    Randomly samples transition rates for a 3-vertex graph, K. These parameters are defined as 10^x, where $ is randomly drawn from the uniform distribution on $(-3, 3)$. 
+    Randomly samples transition rates for a 3-vertex graph, K, which satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val). 
     
     Parameters
     ----------
     min_val : scalar
-        minimum value of sampling range (10^min_val)
+        minimum value of sampling range (default=-3)
     max_val : scalar
-        maximum value of sampling range (10^max_val)
+        maximum value of sampling range (default=3)
     num_params: integer
-        number of rate constants in the Markov process (default=6)
+        number of transition rates in graph (default=6)
         
     Returns
     -------
     params : 1D array
-             parameter values in 3-vertex graph that satisfy the cycle condition
+             transition rates in the 3-vertex graph satisfy the cycle condition
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     params = np.zeros(num_params,dtype=np.float128)
@@ -35,28 +35,29 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     # randomly sample the first 5 parameters
     params[:-1] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
     
-    # allow the 6th parameter (e = params_31) to be a free parameter
+    # allow the 6th parameter (e = params[-1]) to be a free parameter
     params[-1] = (params[1]*params[3]*params[4])/(params[0]*params[2])
                        
     return params
 
 def random_parameters(min_val=-3,max_val=3,num_params=6):
     """
-    Randomly samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
+    Randomly samples transition rates for a 3-vertex graph, K, which do not necessarily satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val).
     
     Parameters
     ----------
     min_val : scalar
-        minimum value of sampling range (10^min_val)
+        minimum value of sampling range (default=-3)
     max_val : scalar
-        maximum value of sampling range (10^max_val)
+        maximum value of sampling range (default=3)
     num_params: integer
-        number of rate constants in the Markov process (default=6)
+        number of transition rates in graph (default=6)
                
     Returns
     -------
     params : 1D array
-             non-equilibrium values of parameters in Markovian system
+             transition rates in the 3-vertex graph
+             order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     
     params = np.zeros(num_params,dtype=np.float128)
