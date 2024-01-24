@@ -169,25 +169,26 @@ def cycle_affinity_K(params):
 
 ## HIGHER-ORDER AUTOCORRELATION FUNCTIONS ##
 
-def autocorrelation_analytical(signal,L,tau,alpha=1,beta=3):
+def autocorrelation_analytical(signal,L,tau,pi,alpha=1,beta=3):
     """
-    Calculates the analytical solution for forward and reverse higher-order autocorrelation functions for a particular Laplacian matrix using the following formula (in LaTeX):
-    
-    $$G^{\alpha,\beta}(\tau) = f^\alpha e^{L \tau} f^{* \beta} \pi$$
+    Numerically calculates the asymmetric autocorrelation functions A^{1,3}(\tau) and A^{3,1}(\tau) for a particular Laplacian matrix. This function works for a linear framework graph of any size.
     
     Parameters
     ----------
     signal : 1D array
-        vector of possible values of signal S(1), S(2), S(3)
+        vector of possible values of signal S = (S(1), ..., S(N))
         
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
     
     tau : 1D array
         range of intervals between values of signal along integration interval
+        
+    pi : 1D array
+         the steady state distribution for a linear framework graph with N vertices
     
     alpha, beta : scalar
-        exponents applied to signal
+        asymmetric exponents applied to signal (default: alpha=1, beta=3)
     
     Returns
     -------
@@ -201,14 +202,12 @@ def autocorrelation_analytical(signal,L,tau,alpha=1,beta=3):
     # define the signal vectors
     s = np.array([signal],dtype=np.float128) # row vector
     s_t = s.T # column vector
-    
-    # calculate the steady-state probability distribution of K
-    pi = steady_state_MTT(params)
         
     # initialize forward and reverse autocorrelation function arrays
     a_13 = np.zeros(len(tau),dtype=np.float128)
     a_31 = np.zeros(len(tau),dtype=np.float128)
     
+    # vectorize the Laplacian matrix multiplied by each value in the vector tau
     list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
     
     # populate arrays with analytical solution to autocorrelation function
