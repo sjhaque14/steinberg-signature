@@ -40,7 +40,7 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
                        
     return params
 
-def nonequilibrium_parameters(min_val=-3,max_val=3,num_params=6):
+def random_parameters(min_val=-3,max_val=3,num_params=6):
     """
     Randomly samples non-equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
     
