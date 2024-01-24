@@ -13,7 +13,7 @@ import scipy.linalg
 
 def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     """
-    Logarithmically samples equilibrium parameters for the 3-vertex graph from the range [10^min_val, 10^max_val].
+    Randomly samples transition rates for a 3-vertex graph, K. These parameters are defined as 10^x, where $ is randomly drawn from the uniform distribution on $(-3, 3)$. 
     
     Parameters
     ----------
@@ -58,19 +58,10 @@ def random_parameters(min_val=-3,max_val=3,num_params=6):
     params : 1D array
              non-equilibrium values of parameters in Markovian system
     """
-    params = np.array([],dtype=np.float128)
     
-    while params.size == 0:
-                
-        # randomly sample (num_params) parameters
-        vals = 10**(np.random.uniform(min_val,max_val, size = num_params))
-
-        # double check that the parameters don't accidentally satisfy detailed balance
-        forward = vals[0]*vals[2]*vals[5]
-        reverse = vals[1]*vals[3]*vals[4]
-        
-        if (forward != reverse) and (reverse != 0):
-            params = vals
+    params = np.zeros(num_params,dtype=np.float128)
+    
+    params[:] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
     
     return params
 
