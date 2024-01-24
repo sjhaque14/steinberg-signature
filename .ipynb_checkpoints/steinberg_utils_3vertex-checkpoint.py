@@ -198,13 +198,13 @@ def autocorrelation_analytical(signal,L,tau,alpha=1,beta=3):
         reverse autocorrelation function values
     
     """
+    # define the signal vectors
     s = np.array([signal],dtype=np.float128) # row vector
     s_t = s.T # column vector
     
     # calculate the steady-state probability distribution of K
-    eigvals, eigvecs = scipy.linalg.eig(L)
-    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
-    
+    pi = steady_state_MTT(params)
+        
     # initialize forward and reverse autocorrelation function arrays
     a_13 = np.zeros(len(tau),dtype=np.float128)
     a_31 = np.zeros(len(tau),dtype=np.float128)
