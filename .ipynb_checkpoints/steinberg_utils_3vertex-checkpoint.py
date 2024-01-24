@@ -199,21 +199,25 @@ def autocorrelation_analytical(signal,L,tau,pi,alpha=1,beta=3):
         reverse autocorrelation function values
     
     """
-    # define the signal vectors
-    s = np.array([signal],dtype=np.float128) # row vector
-    s_t = s.T # column vector
-        
     # initialize forward and reverse autocorrelation function arrays
     a_13 = np.zeros(len(tau),dtype=np.float128)
     a_31 = np.zeros(len(tau),dtype=np.float128)
+    
+    # define the signal vectors
+    # define the signal vectors
+    s_t = np.array([signal],dtype=np.float128) # row vector
+    s = s_t.T # column vector
+    
+    # create the diagonal steady state matrix 
+    delta_u_star = np.diag(pi)
     
     # vectorize the Laplacian matrix multiplied by each value in the vector tau
     list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
     
     # populate arrays with analytical solution to autocorrelation function
     for i in range(len(tau)):
-        a_13[i] = s**beta @ list_result[i] @(s_t ** alpha * pi)
-        a_31[i] = s**alpha @ list_result[i] @(s_t ** beta * pi)
+        a_13[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
+        a_31[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
         
     return a_13, a_31
 
