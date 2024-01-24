@@ -193,7 +193,7 @@ def Laplacian_all(edge_list,label_list,node_list):
     
     return L
 
-def steady_state_MTT(L):
+def steady_state_spectrum(L):
     """
     Calculates the steady-state distribution for the any linear framework graph by computing the eigenvector associated with eigenvalue 0.
     
