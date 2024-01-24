@@ -62,7 +62,7 @@ def random_parameters(min_val=-3,max_val=3,num_params=6):
     
     params = np.zeros(num_params,dtype=np.float128)
     
-    params[:] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
+    params[:] = 10**(np.random.uniform(min_val,max_val, size = num_params))
     
     return params
 
