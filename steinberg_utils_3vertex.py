@@ -217,7 +217,7 @@ def autocorrelation_analytical(signal,L,tau,pi,alpha=1,beta=3):
     # populate arrays with analytical solution to autocorrelation function
     for i in range(len(tau)):
         a_13[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
-        a_31[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
+        a_31[i] = (s_t**alpha @ list_result[i]) @ (delta_u_star @ s ** beta)
         
     return a_13, a_31
 
