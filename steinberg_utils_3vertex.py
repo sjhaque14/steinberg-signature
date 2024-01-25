@@ -169,7 +169,7 @@ def cycle_affinity_K(params):
 
 ## HIGHER-ORDER AUTOCORRELATION FUNCTIONS ##
 
-def autocorrelation_analytical(signal,L,tau,pi,alpha=1,beta=3):
+def autocorrelation_analytical_final(signal,L,tau,pi,alpha=1,beta=3):
     """
     Numerically calculates the asymmetric autocorrelation functions A^{1,3}(\tau) and A^{3,1}(\tau) for a particular Laplacian matrix. This function works for a linear framework graph of any size.
     

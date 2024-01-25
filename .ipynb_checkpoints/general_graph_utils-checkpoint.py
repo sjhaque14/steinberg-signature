@@ -445,47 +445,54 @@ def make_observable(node_list):
     
     return f
 
-def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
+def autocorrelation_analytical_final(signal,L,tau,pi,alpha=1,beta=3):
     """
-    Calculates the analytical solution for forward and reverse higher-order autocorrelation functions for a particular Laplacian matrix
+    Numerically calculates the asymmetric autocorrelation functions A^{1,3}(\tau) and A^{3,1}(\tau) for a particular Laplacian matrix. This function works for a linear framework graph of any size.
     
     Parameters
     ----------
-    observable : 1D array
-        possible values of observable (which is a state function on the Markov process)
+    signal : 1D array
+        vector of possible values of signal S = (S(1), ..., S(N))
+        
     L : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
-    tau_n : 1D array
-        range of intervals between values of observable taken by system
-    alpha : scalar
-        exponent applied to observable
-    beta : scalar
-        exponent applied to transpose of observable
+    
+    tau : 1D array
+        range of intervals between values of signal along integration interval
+        
+    pi : 1D array
+         the steady state distribution for a linear framework graph with N vertices
+    
+    alpha, beta : scalar
+        asymmetric exponents applied to signal (default: alpha=1, beta=3)
     
     Returns
     -------
-    t : 1D array
+    a_13 : 1D array
         forward autocorrelation function values
-    t_rev : 1D array
+    
+    a_31 : 1D array
         reverse autocorrelation function values
     
     """
-    f = np.array([observable],dtype=np.float128)
-    fstar = f.T
-    
-    # calculate the stationary distribution of the Markov process
-    eigvals, eigvecs = scipy.linalg.eig(L)
-    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
-    
     # initialize forward and reverse autocorrelation function arrays
-    t = np.zeros(len(tau_n),dtype=np.float128)
-    t_rev = np.zeros(len(tau_n),dtype=np.float128)
+    a_13 = np.zeros(len(tau),dtype=np.float128)
+    a_31 = np.zeros(len(tau),dtype=np.float128)
     
-    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau_n))
+    # define the signal vectors
+    # define the signal vectors
+    s_t = np.array([signal],dtype=np.float128) # row vector
+    s = s_t.T # column vector
+    
+    # create the diagonal steady state matrix 
+    delta_u_star = np.diag(pi)
+    
+    # vectorize the Laplacian matrix multiplied by each value in the vector tau
+    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
     
     # populate arrays with analytical solution to autocorrelation function
-    for i in range(len(tau_n)):
-        t[i] = f**alpha @ list_result[i] @(fstar ** beta * pi)
-        t_rev[i] = f**beta @ list_result[i] @(fstar ** alpha * pi)
+    for i in range(len(tau)):
+        a_13[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
+        a_31[i] = (s_t**alpha @ list_result[i]) @ (delta_u_star @ s ** beta)
         
-    return t, t_rev
+    return a_13, a_31
