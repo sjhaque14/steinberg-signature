@@ -210,10 +210,15 @@ def steady_state_spectrum(L):
     """
     
     eigvals, eigvecs = scipy.linalg.eig(L)
-    pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)])
+    x = eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)
     
-    return pi
+    pi_all = np.zeros((len(x)),dtype=np.float128)
 
+    for i in range(len(x)):
+        pi_all[i] = x[i]
+
+    return pi_all
+    
 ## WORKING WITH CYCLES OF G ##
 
 def get_cycle_nodes(G_ud):

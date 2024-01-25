@@ -96,7 +96,7 @@ def Laplacian_K(params):
     
     return L
 
-def steady_state_MTT(params):
+def steady_state_MTT_K(params):
     """
     Calculates the steady-state distribution for the 3-vertex graph K using the linear framework and the Matrix-Tree Theorem.
     
