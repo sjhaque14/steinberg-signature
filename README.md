@@ -15,8 +15,6 @@ This repository contains code to calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ an
   <img src="[https://github.com/sjhaque14/steinberg-signature/fig5.png](https://github.com/sjhaque14/steinberg-signature/blob/main/fig5.png)"/>
 </p>
 
-![My Image](fig5.png)
-
 ## Prerequisites
 
 The following Python3 libraries are used in this library. All of the below can be installed using `pip` or `conda`.
