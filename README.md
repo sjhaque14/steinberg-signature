@@ -11,6 +11,11 @@ This repository contains code to calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ an
 * Calculate $\mathcal{A}^{\alpha,\beta}(\tau)$ and its time-reverse $\mathcal{A}^{\beta,\alpha}(\tau)$ for any continuous time, finite space, time-homogeneous Markov process, represented by a linear framework graph $G$.
 * Calculate $\mathcal{I}^{\alpha,\beta}(G) = \int_{0}^{\infty} \left(\mathcal{A}^{\alpha,\beta}(\tau) - \mathcal{A}^{\beta,\alpha}(\tau)\right) d\tau$ as a function of the cycle affinity of the 3-vertex graph $\tilde{A}(C) = \ln{\left ( \dfrac{ade}{bfc} \right )}$ (see edge label assignments in the figure below) as a single edge label is driven further and further from its equilibrium value (i.e. for which $\tilde{A}(C) = 0$).
 
+<p align="center">
+  <img src="https://github.com/sjhaque14/steinberg-signature/fig5.png?raw=true"/>
+</p>
+
+
 ![My Image](fig5.png)
 
 ## Prerequisites
