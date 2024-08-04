@@ -92,7 +92,7 @@ def Laplacian_K(params):
     f = params[4]
     e = params[5]
     
-    L = np.array([[-(a+f), b, e], [a, -(b+d), c], [f, d, -(e+c)]],dtype=np.float128)
+    L = np.array([[-(a+f), b, e], [a, -(b+d), c], [f, d, -(e+c)]])
     
     return L
 
@@ -200,12 +200,12 @@ def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
     
     """
     # initialize forward and reverse autocorrelation function arrays
-    a_13 = np.zeros(len(tau),dtype=np.float128)
-    a_31 = np.zeros(len(tau),dtype=np.float128)
+    a_13 = np.zeros(len(tau))
+    a_31 = np.zeros(len(tau))
     
     # define the signal vectors
     # define the signal vectors
-    s_t = np.array([signal],dtype=np.float128) # row vector
+    s_t = np.array([signal]) # row vector
     s = s_t.T # column vector
     
     # create the diagonal steady state matrix 
