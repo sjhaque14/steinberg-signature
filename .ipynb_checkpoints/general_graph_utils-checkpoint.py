@@ -298,16 +298,16 @@ def calculate_cycle_products(cycle_labels_forward,cycle_labels_backward):
     
     return products_f, products_b
 
-def calculate_affinities(affinities_f, affinities_b, cycle_list):
+def calculate_affinities(products_f, products_b, cycle_list):
     """
     Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
     
     Parameters
     ----------
-    affinities_f : 1D array
+    products_f : 1D array
         each element is the product of labels corresponding to the forward traversal of each cycle
     
-    affinities_b : 1D array
+    products_b : 1D array
         each element is the product of labels corresponding to the backward traversal of each cycle
         
     cycle_list : list of lists
@@ -326,7 +326,7 @@ def calculate_affinities(affinities_f, affinities_b, cycle_list):
     total_affinities = np.zeros(num_cycles,dtype=np.float128)
     
     for i in range(num_cycles):
-        total_affinities[i] = np.log(affinities_f[i]/affinities_b[i])
+        total_affinities[i] = np.log(products_f[i]/products_b[i])
     
     return total_affinities
 
