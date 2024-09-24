@@ -101,7 +101,7 @@ def random_graph_n(n):
     
     return G, G_ud
 
-# OBTAINING STRUCTURAL INFORMATION FROM G ##
+# DEFINE DATA STRUCTURES FOR STRUCTURAL INFORMATION OF GRAPHS ##
 
 def get_nodes(G):
     """
@@ -148,7 +148,7 @@ def get_labels(G):
     
     return label_dict, label_list
 
-# CALCULATING THE LAPLACIAN ##
+## COMPUTE THE LAPLACIAN AND ITS SPECTRUM ##
 
 def Laplacian_all(edge_list,label_list,node_list):
     """
