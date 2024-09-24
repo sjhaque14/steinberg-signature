@@ -330,8 +330,6 @@ def calculate_affinities(products_f, products_b, cycle_list):
     
     return total_affinities
 
-# Initialize a graph at thermodynamic equilibrium -- THIS DOES NOT WORK WELL
-
 def initial_equilibrium_parameters(cycle_list,cycle_edges_forward,cycle_labels_forward,cycle_labels_backward):
     """
     Initializes a graph with a particular parameterization in an equilibrium steady state
