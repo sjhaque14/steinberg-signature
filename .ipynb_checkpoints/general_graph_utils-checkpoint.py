@@ -5,19 +5,19 @@ import scipy.linalg
 
 # general-graph-utils.py
 
-# This library allows the user to greate linear framework graphs (finite, directed graphs with no self-loops and labeled edges). The user can randomly generate a strongly connected and reversible linear framework graph G, calculate its Laplacian matrix and its spectrum, and calculate the Steinberg signature from that matrix. The user can also determine how the Steinberg signature changes as a function of increasing entropy production. This software was developed using the NetworkX software package. For more information abpout NetworkX, see https://networkx.org/documentation/stable/index.html
+# This library allows the user to greate linear framework graphs (finite, directed graphs with no self-loops and labeled edges). The user can randomly generate a strongly connected and fully reversible linear framework graph G, calculate its Laplacian matrix and its spectrum, and calculate the Steinberg signature from that matrix. The user can also determine how the Steinberg signature changes as a function of increasing entropy production. This software was developed using the NetworkX software package (https://networkx.org/documentation/stable/index.html)
 
-# Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this file require the undirected graph object as an argument (particular the cycle-related functions). For the most part, however, the user can use a directed graph object 
+# Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this file require the undirected graph object as an argument (particular the cycle-related functions).
 
-## RANDOM GENERATION OF LINEAR FRAMEWORK GRAPHS ##
+## CREATING LINEAR FRAMEWORK GRAPHS ##
 
 def random_graph(n):
     """
-    Randomly generates a linear framework graph -- a finite, directed graph with no self-loops -- that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n), and the edges are added by randomly selecting a pair of nodes in G.
+    Randomly generates a linear framework graph -- a finite, directed graph with no self-loops -- that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n).
     
     Parameters
     ----------
-    n : integer
+    n : integer > 3
         the maximum number of vertices
     
     Returns
@@ -34,6 +34,51 @@ def random_graph(n):
     
     # determine the number of nodes in G
     G_size = np.random.choice(np.arange(3,n), size=1)
+    
+    # add nodes to G and G_ud
+    nodes = np.arange(1,G_size+1,step=1)
+    G.add_nodes_from(nodes)
+    G_ud.add_nodes_from(nodes)
+    
+    # add edges until the graph is strongly connected
+    while nx.is_strongly_connected(G) == False:
+        u, v = np.random.choice(nodes, size=2,replace=False)
+        G.add_edge(u,v)
+        G_ud.add_edge(u,v)
+    
+    # add edges such that the graph is fully reversible
+    for edge in G.edges:
+        u = edge[0]
+        v = edge[1]
+        if G.has_edge(v,u) == False:
+            G.add_edge(v,u)
+            G_ud.add_edge(v,u)
+    
+    return G, G_ud
+
+def random_graph_n(n):
+    """
+    Generates a linear framework graph -- a finite, directed graph with no self-loops -- of size n that is strongly connected and fully reversible.
+    
+    Parameters
+    ----------
+    n : integer
+        the size of the graph, or the number of vertices
+    
+    Returns
+    -------
+    G : NetworkX DiGraph object
+        directed graph
+    
+    G_ud : NetworkX Graph object
+        undirected graph
+    """
+    
+    G = nx.DiGraph()
+    G_ud = nx.Graph()
+    
+    # determine the number of nodes in G
+    G_size = n
     
     # add nodes to G and G_ud
     nodes = np.arange(1,G_size+1,step=1)
@@ -329,8 +374,6 @@ def calculate_affinities(products_f, products_b, cycle_list):
         total_affinities[i] = np.log(products_f[i]/products_b[i])
     
     return total_affinities
-
-# Initialize a graph at thermodynamic equilibrium -- THIS DOES NOT WORK WELL
 
 def initial_equilibrium_parameters(cycle_list,cycle_edges_forward,cycle_labels_forward,cycle_labels_backward):
     """
