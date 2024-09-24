@@ -152,7 +152,7 @@ def get_labels(G):
 
 def Laplacian_all(edge_list,label_list,node_list):
     """
-    Calculates the Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
+    Calculates the column-based Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
     
     L_{ij}(G) = e_{ij} if i \neq j
     L_{ij}(G) = -\sum_{v \neq j} e_{vj} if i = j.
@@ -198,7 +198,7 @@ def Laplacian_all(edge_list,label_list,node_list):
 
 def steady_state_spectrum(L):
     """
-    Calculates the steady-state distribution for the any linear framework graph by computing the eigenvector associated with eigenvalue 0.
+    Calculates the steady-state distribution for the any linear framework graph by computing the right eigenvector associated with eigenvalue 0.
     
     Parameters
     ----------
