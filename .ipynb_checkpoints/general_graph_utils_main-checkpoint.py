@@ -9,11 +9,9 @@ import scipy.linalg
 
 # Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this file require the undirected graph object as an argument (particular the cycle-related functions).
 
-## CREATING LINEAR FRAMEWORK GRAPHS ##
-
 def random_graph(n):
     """
-    Randomly generates a linear framework graph -- a finite, directed graph with no self-loops -- that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n).
+    Generates a linear framework graph that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n), and the edges are added by randomly selecting a pair of nodes in G.
     
     Parameters
     ----------
@@ -58,12 +56,12 @@ def random_graph(n):
 
 def random_graph_n(n):
     """
-    Generates a linear framework graph -- a finite, directed graph with no self-loops -- of size n that is strongly connected and fully reversible.
+    Generates a linear framework graph of size n that is strongly connected and fully reversible.
     
     Parameters
     ----------
     n : integer
-        the size of the graph, or the number of vertices
+        the size of the graph
     
     Returns
     -------
@@ -106,24 +104,64 @@ def random_graph_n(n):
 def get_nodes(G):
     """
     Returns an array of nodes in a NetworkX graph object (directed or undirected)
+    
+    Parameters
+    ----------
+    G : NetworkX DiGraph object
+        directed graph
+    
+    Returns
+    -------
+    node_list : NumPy array
+        list of nodes
     """
-    return np.array(G.nodes)
+    node_list = np.array(G.nodes)
+    return node_list
 
 def get_edges(G):
     """
     Returns an array of edges in a NetworkX graph object (directed). Each edge is represented as a list [source,sink]
+        
+    Parameters
+    ----------
+    G : NetworkX DiGraph object
+        directed graph
     
-    Note: works for undirected graph, but if given a choice, better to use a directed graph
+    Returns
+    -------
+    edge_list : NumPy array
+        list of lists of directed edges (each directed edge is represented as a list)
     """
-    return np.array(G.edges)
+    edge_list = np.array(G.edges)
+    return edge_list
 
-def get_labels(G):
+def get_cycles(G_ud):
     """
-    Extracts the label information for each edge in a NetworkX graph object. If G not labeled, labels are sampled as 10^x, where x is sampled uniformly between -3 and 3. This function works for undirected graph, but if given a choice, better to use a directed graph
+    Returns a list of the cycles which form a basis G (must be undirected). Each element is a list of the nodes connected in a given cycle.
     
     Parameters
     ----------
-    G : NetworkX graph object (directed)
+    G_ud : NetworkX Graph object
+        undirected graph
+            
+    Returns
+    -------
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+    """
+    
+    cycle_list = [c for c in nx.cycle_basis(G_ud)]
+    
+    return cycle_list
+
+def get_labels(G):
+    """
+    Extracts the label information for each edge in a NetworkX graph object. If G not labeled, labels are sampled as 10^x, where x is sampled uniformly between -3 and 3.
+    
+    Parameters
+    ----------
+    G : NetworkX DiGraph object
+        directed graph
             
     Returns
     -------
@@ -221,26 +259,6 @@ def steady_state_spectrum(L):
         pi_all[i] = x[i]
 
     return pi_all
-    
-## WORKING WITH CYCLES OF G ##
-
-def get_cycle_nodes(G_ud):
-    """
-    Returns a list of the cycles which form a basis G (must be undirected). Each element is a list of the nodes connected in a given cycle.
-    
-    Parameters
-    ----------
-    G_ud : NetworkX graph object (undirected)
-            
-    Returns
-    -------
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
-    """
-    
-    cycle_list = [c for c in nx.cycle_basis(G_ud)]
-    
-    return cycle_list
 
 def get_cycle_labels_edges(cycle_list,label_dict):
     """
