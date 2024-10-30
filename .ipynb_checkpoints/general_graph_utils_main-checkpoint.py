@@ -175,18 +175,152 @@ def get_labels(G):
     
     label_dict = {}
     
+    # if G weighted/labeled, extract weight information in dictionary form
     if nx.is_weighted(G)==True:
         for i in range(len(G.edges())):
             label_dict[list(G.edges())[i]] = G.get_edge_data(list(G.edges)[i][0],list(G.edges)[i][1])['weight']
-        
+    
+    # if G not weighted/labeled, sample new edge label for each edge
     elif nx.is_weighted(G)==False:
         label_dict = {e: np.around(10**(np.random.uniform(-3,3, size = 1)[0]),decimals=5) for e in G.edges}
-        
+    
+    # create a list of edge labels directly from the dictionary
     label_list = np.fromiter(label_dict.values(), dtype=float)
     
     return label_dict, label_list
 
-## COMPUTE THE LAPLACIAN AND ITS SPECTRUM ##
+def get_cycle_labels_edges(cycle_list,label_dict):
+    """
+    Extracts, for each cycle, the edges involved and their respective edge labels.
+    
+    Parameters
+    ----------    
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+        
+    label_dict : dictionary
+        keys: edges in G represented as tuple (source,sink), values: edge labels
+        
+    Returns
+    -------
+    cycle_edges_forward : list of lists
+        each element is a list of the edges going around one direction of a given cycle
+    
+    cycle_edges_backward : list of lists
+        each element is a list of the edges going around the opposite direction of a given cycle
+    
+    cycle_labels_forward : list of lists
+        each element is a list of the labels going around one direction of a given cycle
+    
+    cycle_labels_backward : list of lists
+        each element is a list of the labels going around the opposite direction of a given cycle
+        
+    """
+    
+    # define number of cycles
+    num_cycles = len(cycle_list)
+    
+    # define arrays for edges in each direction
+    cycle_edges_forward = [[] for i in range(num_cycles)]
+    cycle_edges_backward = [[] for i in range(num_cycles)]
+    
+    # define arrays for labels in each direction
+    cycle_labels_forward = [[] for i in range(num_cycles)]
+    cycle_labels_backward = [[] for i in range(num_cycles)]
+
+    # iterate over each cycle
+    for j in range(num_cycles):
+        
+        for i in range(1,len(cycle_list[j])):
+            
+            source = cycle_list[j][i-1]
+            sink = cycle_list[j][i]
+            
+            # edge (source,sink) and accompanying labels
+            cycle_labels_forward[j].append(label_dict.get((source,sink)))
+            cycle_edges_forward[j].append((source,sink))
+            
+            #edge (sink, source) and accompanying labels
+            cycle_labels_backward[j].append(label_dict.get((sink,source)))
+            cycle_edges_backward[j].append((sink,source))
+        
+        # account for the connection between the last and first elements of each cycle list
+        final_source = cycle_list[j][-1]
+        final_sink = cycle_list[j][0]
+
+        # edge (final_source, final_sink) and accompanying labels
+        cycle_labels_forward[j].append(label_dict.get((final_source,final_sink)))
+        cycle_edges_forward[j].append((final_source,final_sink))
+        
+        # edge (final_sink, final source) and accompanying labels
+        cycle_labels_backward[j].append(label_dict.get((final_sink,final_source)))
+        cycle_edges_backward[j].append((final_sink,final_source))
+        
+    return cycle_edges_forward, cycle_edges_backward, cycle_labels_forward, cycle_labels_backward
+
+def calculate_cycle_products(cycle_labels_forward,cycle_labels_backward):
+    """
+    Calculates the product of edge labels going in forward and reverse directions for each cycle
+    
+    Parameters
+    ----------
+    cycle_labels_forward : list of lists
+        each element is a list of the labels going around one direction of a given cycle
+    
+    cycle_labels_backward : list of lists
+        each element is a list of the labels going around the opposite direction of a given cycle
+        
+    Returns
+    -------
+    products_f : 1D array
+        each element is the product of labels corresponding to the forward traversal of each cycle
+    
+    products_b : 1D array
+        each element is the product of labels corresponding to the backward traversal of each cycle
+        
+    """
+    products_f = np.zeros(len(cycle_labels_forward),dtype=np.float128)
+    products_b = np.zeros(len(cycle_labels_backward),dtype=np.float128)
+
+    for i in range(len(cycle_labels_forward)):
+        products_f[i] = np.prod(cycle_labels_forward[i])
+        products_b[i] = np.prod(cycle_labels_backward[i])
+    
+    return products_f, products_b
+
+def calculate_affinities(products_f, products_b, cycle_list):
+    """
+    Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
+    
+    Parameters
+    ----------
+    products_f : 1D array
+        each element is the product of labels corresponding to the forward traversal of each cycle
+    
+    products_b : 1D array
+        each element is the product of labels corresponding to the backward traversal of each cycle
+        
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+        
+    Returns
+    -------
+    
+    total_affinities : 1D array
+        each element is the thermodynamic force for each cycle in the graph, corresponding to their order in cycle_list
+    
+    """
+    
+    num_cycles = len(cycle_list)
+    
+    total_affinities = np.zeros(num_cycles,dtype=np.float128)
+    
+    for i in range(num_cycles):
+        total_affinities[i] = np.log(products_f[i]/products_b[i])
+    
+    return total_affinities
+
+
 
 def Laplacian_all(edge_list,label_list,node_list):
     """
@@ -259,139 +393,6 @@ def steady_state_spectrum(L):
         pi_all[i] = x[i]
 
     return pi_all
-
-def get_cycle_labels_edges(cycle_list,label_dict):
-    """
-    Extracts, for each cycle, the edges involved and their respective edge labels.
-    
-    Parameters
-    ----------    
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
-        
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels
-        
-    Returns
-    -------
-    cycle_edges_forward : list of lists
-        each element is a list of the edges going around one direction of a given cycle
-    
-    cycle_edges_backward : list of lists
-        each element is a list of the edges going around the opposite direction of a given cycle
-    
-    cycle_labels_forward : list of lists
-        each element is a list of the labels going around one direction of a given cycle
-    
-    cycle_labels_backward : list of lists
-        each element is a list of the labels going around the opposite direction of a given cycle
-        
-    """
-    
-    # define number of cycles
-    num_cycles = len(cycle_list)
-    
-    # define arrays for edges in each direction
-    cycle_edges_forward = [[] for i in range(num_cycles)]
-    cycle_edges_backward = [[] for i in range(num_cycles)]
-    
-    # define arrays for labels in each direction
-    cycle_labels_forward = [[] for i in range(num_cycles)]
-    cycle_labels_backward = [[] for i in range(num_cycles)]
-
-    # iterate over each cycle
-    for j in range(num_cycles):
-        
-        for i in range(1,len(cycle_list[j])):
-            
-            source = cycle_list[j][i-1]
-            sink = cycle_list[j][i]
-            
-            # edge (source,sink) and accompanying labels
-            cycle_labels_forward[j].append(label_dict.get((source,sink)))
-            cycle_edges_forward[j].append((source,sink))
-            
-            #edge (sink, source) and accompanying labels
-            cycle_labels_backward[j].append(label_dict.get((sink,source)))
-            cycle_edges_backward[j].append((sink,source))
-        
-        # account for the connection between the last and first elements of each cycle list
-        final_source = cycle_list[j][-1]
-        final_sink = cycle_list[j][0]
-
-        # edge (final_source, final_sink) and accompanying labels
-        cycle_labels_forward[j].append(label_dict.get((final_source,final_sink)))
-        cycle_edges_forward[j].append((final_source,final_sink))
-        
-        # edge (final_sink, final source) and accompanying labels
-        cycle_labels_backward[j].append(label_dict.get((final_sink,final_source)))
-        cycle_edges_backward[j].append((final_sink,final_source))
-        
-    return cycle_edges_forward, cycle_edges_backward, cycle_labels_forward, cycle_labels_backward
-
-# Computing the cycle affinity (thermodynamic force)
-
-def calculate_cycle_products(cycle_labels_forward,cycle_labels_backward):
-    """
-    Calculates the product of edge labels going in forward and reverse directions for each cycle
-    
-    Parameters
-    ----------
-    cycle_labels_forward : list of lists
-        each element is a list of the labels going around one direction of a given cycle
-    
-    cycle_labels_backward : list of lists
-        each element is a list of the labels going around the opposite direction of a given cycle
-        
-    Returns
-    -------
-    products_f : 1D array
-        each element is the product of labels corresponding to the forward traversal of each cycle
-    
-    products_b : 1D array
-        each element is the product of labels corresponding to the backward traversal of each cycle
-        
-    """
-    products_f = np.zeros(len(cycle_labels_forward),dtype=np.float128)
-    products_b = np.zeros(len(cycle_labels_backward),dtype=np.float128)
-
-    for i in range(len(cycle_labels_forward)):
-        products_f[i] = np.prod(cycle_labels_forward[i])
-        products_b[i] = np.prod(cycle_labels_backward[i])
-    
-    return products_f, products_b
-
-def calculate_affinities(products_f, products_b, cycle_list):
-    """
-    Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
-    
-    Parameters
-    ----------
-    products_f : 1D array
-        each element is the product of labels corresponding to the forward traversal of each cycle
-    
-    products_b : 1D array
-        each element is the product of labels corresponding to the backward traversal of each cycle
-        
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
-        
-    Returns
-    -------
-    
-    total_affinities : 1D array
-        each element is the thermodynamic force for each cycle in the graph, corresponding to their order in cycle_list
-    
-    """
-    
-    num_cycles = len(cycle_list)
-    
-    total_affinities = np.zeros(num_cycles,dtype=np.float128)
-    
-    for i in range(num_cycles):
-        total_affinities[i] = np.log(products_f[i]/products_b[i])
-    
-    return total_affinities
 
 def initial_equilibrium_parameters(cycle_list,cycle_edges_forward,cycle_labels_forward,cycle_labels_backward):
     """
