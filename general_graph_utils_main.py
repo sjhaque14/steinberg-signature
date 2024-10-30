@@ -467,7 +467,7 @@ def reformat_labels(cycle_list, cycle_edges_forward, cycle_labels_forward, edge_
     num_cycles = len(cycle_list)
     
     for i in range(num_cycles):
-        print(cycle_edges_forward[i][index_tracker[i]])
+        #print(cycle_edges_forward[i][index_tracker[i]])
         label_dict[edge_tracker[i]] = cycle_labels_forward[i][index_tracker[i]]
         
     label_list = np.fromiter(label_dict.values(), dtype=float)
