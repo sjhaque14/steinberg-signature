@@ -391,11 +391,15 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
         
     edge_tracker: list
         list of edges with altered labels
+        
+    index_tracker: list
+        list of second indices of altered edges in cycle_labels_forward
     
     """
     num_cycles = len(cycle_list)
     # tracking edges that have had their values altered
     edge_tracker = []
+    index_tracker = []
     # count the cycles that have been initialized at equilibrium
     cycles_done = -1
     
@@ -414,17 +418,18 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
             
             # if the edge is not shared with other cycles, recalculate its value
             if ((edge in new_cycle_edges_forward)==True):
+                #print(j)
                 # recalculate edge label using the cycle condition
                 edge_label = 1/(products_f[i]/(edge_label*products_b[i]))
                 cycle_labels_forward[i][j] = edge_label
                 # add that edge to edge_tracker
                 edge_tracker.append(cycle_edges_forward[i][j])
+                index_tracker.append(j)
                 cycles_done += 1
-                print("cycles done: " + str(cycles_done))
             else:
                 continue
             
-    return cycle_labels_forward, edge_tracker
+    return cycle_labels_forward, edge_tracker, index_tracker
 
 def reformat_labels(cycle_list, cycle_edges_forward, cycle_labels_forward, edge_tracker, index_tracker, label_dict, label_list):
     """
