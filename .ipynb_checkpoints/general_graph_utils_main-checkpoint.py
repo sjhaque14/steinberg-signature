@@ -191,7 +191,7 @@ def get_labels(G):
 
 def get_cycle_labels_edges(cycle_list,label_dict):
     """
-    Extracts, for each cycle, the edges involved and their respective edge labels.
+    Compartmentalizes, for each cycle, the edges involved and their respective edge labels into separate data structures.
     
     Parameters
     ----------    
@@ -231,8 +231,10 @@ def get_cycle_labels_edges(cycle_list,label_dict):
     # iterate over each cycle
     for j in range(num_cycles):
         
+        # for each node in the cycle
         for i in range(1,len(cycle_list[j])):
             
+            # identify what it is connected to
             source = cycle_list[j][i-1]
             sink = cycle_list[j][i]
             
@@ -320,7 +322,65 @@ def calculate_affinities(products_f, products_b, cycle_list):
     
     return total_affinities
 
+def equilibrium_params(cycle_list,cycle_edges_forward,cycle_labels_forward,products_f,products_b):
+    """
+    Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
+    
+    Parameters
+    ----------
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+        
+    cycle_edges_forward : list of lists
+        each element is a list of the edges going around one direction of a given cycle
+        
+    cycle_labels_forward : list of lists
+        each element is a list of the labels going around one direction of a given cycle
+    
+    products_f : 1D array
+        each element is the product of labels corresponding to the forward traversal of each cycle
+    
+    products_b : 1D array
+        each element is the product of labels corresponding to the backward traversal of each cycle
+        
+    Returns
+    -------
+    
+    cycle_labels_forward : list of lists
+        updated cycle_labels_forward with new edge labels
+        
+    edge_tracker: list
+        list of edges with altered labels
+    
+    """
+    num_cycles = len(cycle_list)
+    
+    # tracking edges that have had their values altered
+    edge_tracker = []
 
+    # for each cycle in cycle_list
+    for i in range(num_cycles):
+        # choose a random edge in the "forward" direction
+        j = np.random.randint(len(cycle_list[i])-1,size=1)[0]
+        edge = cycle_edges_forward[i][j]
+        edge_label = cycle_labels_forward[i][j]
+
+        # if the edge is already in edge_tracker from another, choose another edge
+        if edge in edge_tracker:
+            k = j
+            exclude_j = list(range(1,k)) + list(range(k+1, len(cycle_list[i])-1))
+            j = np.random.randint(exclude_j,size=1)[0]
+            edge = cycle_edges_forward[i][j]
+            edge_label = cycle_labels_forward[i][j]
+        
+        # recalculate edge label using the cycle condition
+        edge_label = 1/(products_f[i]/(edge_label*products_b[i]))
+        cycle_labels_forward[i][j] = edge_label
+        
+        # add that edge to edge_tracker
+        edge_tracker.append(cycle_edges_forward[i][j])
+    
+    return cycle_labels_forward, edge_tracker
 
 def Laplacian_all(edge_list,label_list,node_list):
     """
@@ -394,54 +454,8 @@ def steady_state_spectrum(L):
 
     return pi_all
 
-def initial_equilibrium_parameters(cycle_list,cycle_edges_forward,cycle_labels_forward,cycle_labels_backward):
-    """
-    Initializes a graph with a particular parameterization in an equilibrium steady state
-    
-    Parameters
-    ----------
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
 
-    cycle_edges_forward : list of lists
-        each element is a list of the edges going around one direction of a given cycle
 
-    cycle_labels_forward : list of lists
-        each element is a list of the labels going around one direction of a given cycle
-    
-    cycle_labels_backward : list of lists
-        each element is a list of the labels going around the opposite direction of a given cycle
-
-    Returns
-    -------
-    
-    cycle_labels_forward : list of lists
-        updated with new values for certain edges
-        
-    edge_tracker : list of lists
-        list of edges with labels that were changed to initialize the system in an equilibrium steady state
-    
-    """
-    
-    num_cycles = len(cycle_list)
-    edge_tracker = []
-    
-    # for each cycle in cycle_list
-    for i in range(num_cycles):
-        for j in range(len(cycle_list[i])):
-            
-            # if the edge is already in edge_tracker, move on
-            if cycle_edges_forward[i][j] in edge_tracker:
-                pass
-            
-            # otherwise, change the value of one edge in the cycle such that the cycle affinity is 0
-            else:
-                cycle_labels_forward[i][j] = 1/(np.prod(cycle_labels_forward[i])/(cycle_labels_forward[i][j]*np.prod(cycle_labels_backward[i])))
-                
-                # add that edge to edge_tracker
-                edge_tracker.append(cycle_edges_forward[i][j])
-    
-    return cycle_labels_forward, edge_tracker
 
 def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
     """
