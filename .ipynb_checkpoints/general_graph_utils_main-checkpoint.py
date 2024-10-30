@@ -382,6 +382,47 @@ def equilibrium_params(cycle_list,cycle_edges_forward,cycle_labels_forward,produ
     
     return cycle_labels_forward, edge_tracker
 
+def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
+    """
+    Initializes a graph with a particular parameterization in an equilibrium steady state
+    
+    Parameters
+    ----------
+    
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+    
+    cycle_labels_forward : list of lists
+        updated with new values for certain edges
+        
+    edge_tracker : list of lists
+        list of edges with labels that were changed to initialize the system in an equilibrium steady state
+        
+    label_dict : dictionary
+        keys: edges in G represented as tuple (source,sink), values: edge labels
+        
+    label_list : 1D numpy array
+        list of edge labels in G
+    
+    Returns
+    -------
+    
+    label_dict : dictionary
+        keys: edges in G represented as tuple (source,sink), values: edge labels (updated with equilibrium changes)
+        
+    label_list : 1D numpy array
+        list of edge labels in G (updated with equilibrium changes
+    """
+    
+    num_cycles = len(cycle_list)
+    
+    for i in range(num_cycles):
+        label_dict[edge_tracker[i]] = cycle_labels_forward[i][0]
+        
+    label_list = np.fromiter(label_dict.values(), dtype=float)
+    
+    return label_dict, label_list
+
 def Laplacian_all(edge_list,label_list,node_list):
     """
     Calculates the column-based Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
@@ -453,50 +494,6 @@ def steady_state_spectrum(L):
         pi_all[i] = x[i]
 
     return pi_all
-
-
-
-
-def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
-    """
-    Initializes a graph with a particular parameterization in an equilibrium steady state
-    
-    Parameters
-    ----------
-    
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
-    
-    cycle_labels_forward : list of lists
-        updated with new values for certain edges
-        
-    edge_tracker : list of lists
-        list of edges with labels that were changed to initialize the system in an equilibrium steady state
-        
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels
-        
-    label_list : 1D numpy array
-        list of edge labels in G
-    
-    Returns
-    -------
-    
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels (updated with equilibrium changes)
-        
-    label_list : 1D numpy array
-        list of edge labels in G (updated with equilibrium changes
-    """
-    
-    num_cycles = len(cycle_list)
-    
-    for i in range(num_cycles):
-        label_dict[edge_tracker[i]] = cycle_labels_forward[i][0]
-        
-    label_list = np.fromiter(label_dict.values(), dtype=float)
-    
-    return label_dict, label_list
 
 def G_duplicate_data_structures(G,node_list,edge_list,label_list,label_dict,size,L):
     """
