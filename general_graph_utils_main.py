@@ -426,7 +426,7 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
             
     return cycle_labels_forward, edge_tracker
 
-def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
+def reformat_labels(cycle_list, cycle_edges_forward, cycle_labels_forward, edge_tracker, index_tracker, label_dict, label_list):
     """
     Changes the parameterization of a NetworkX graph object from its initial parameterization
     
@@ -436,11 +436,17 @@ def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, 
     cycle_list : list of lists
         each element is a list of the nodes connected in a given cycle.
     
+    cycle_edges_forward : list of lists
+        each element is a list of the edges going around one direction of a given cycle
+    
     cycle_labels_forward : list of lists
         updated with new values for certain edges
         
     edge_tracker : list of lists
         list of edges with labels that were changed to initialize the system in an equilibrium steady state
+    
+    index_tracker: list
+        list of second indices of altered edges in cycle_labels_forward
         
     label_dict : dictionary
         keys: edges in G represented as tuple (source,sink), values: edge labels
@@ -461,7 +467,8 @@ def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, 
     num_cycles = len(cycle_list)
     
     for i in range(num_cycles):
-        label_dict[edge_tracker[i]] = cycle_labels_forward[i][0]
+        print(cycle_edges_forward[i][index_tracker[i]])
+        label_dict[edge_tracker[i]] = cycle_labels_forward[i][index_tracker[i]]
         
     label_list = np.fromiter(label_dict.values(), dtype=float)
     
