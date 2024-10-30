@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg
+from collections import Counter
 
 # general-graph-utils.py
 
