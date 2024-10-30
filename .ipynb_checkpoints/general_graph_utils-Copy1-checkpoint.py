@@ -9,11 +9,9 @@ import scipy.linalg
 
 # Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this file require the undirected graph object as an argument (particular the cycle-related functions). For the most part, however, the user can use a directed graph object 
 
-## RANDOM GENERATION OF LINEAR FRAMEWORK GRAPHS ##
-
 def random_graph(n):
     """
-    Randomly generates a linear framework graph -- a finite, directed graph with no self-loops -- that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n), and the edges are added by randomly selecting a pair of nodes in G.
+    Generates a linear framework graph that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n), and the edges are added by randomly selecting a pair of nodes in G.
     
     Parameters
     ----------
@@ -56,11 +54,9 @@ def random_graph(n):
     
     return G, G_ud
 
-# OBTAINING STRUCTURAL INFORMATION FROM G ##
-
 def get_nodes(G):
     """
-    Returns an array of nodes in a NetworkX graph object (directed or undirected)
+    Returns an array of nodes in a NetworkX graph object (directed or undirected).
     """
     return np.array(G.nodes)
 
