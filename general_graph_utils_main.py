@@ -99,8 +99,6 @@ def random_graph_n(n):
     
     return G, G_ud
 
-# DEFINE DATA STRUCTURES FOR STRUCTURAL INFORMATION OF GRAPHS ##
-
 def get_nodes(G):
     """
     Returns an array of nodes in a NetworkX graph object (directed or undirected)
@@ -322,7 +320,46 @@ def calculate_affinities(products_f, products_b, cycle_list):
     
     return total_affinities
 
-def equilibrium_params(cycle_list,cycle_edges_forward,cycle_labels_forward,products_f,products_b):
+def shared_edges_cycles(cycle_list, cycle_edges_forward, cycle_edges_backward):
+    """
+    Returns a list of all edges that are mutual to more than one cycle in G
+    
+    Parameters
+    ----------
+    cycle_list : list of lists
+        each element is a list of the nodes connected in a given cycle.
+        
+    cycle_edges_forward : list of lists
+        each element is a list of the edges going around one direction of a given cycle
+    
+    cycle_edges_backward : list of lists
+        each element is a list of the edges going around the opposite direction of a given cycle
+        
+    Returns
+    ----------
+    shared_cycle_edges_list : list
+        list of all the pairs of reversible edges that are shared between at least 2 cycles in G
+    
+    all_cycle_edges_forward : list
+        list of all the edge tuples that are recorded in cycle_edges_forward
+    
+    """
+    all_cycle_edges = []
+    all_cycle_edges_forward = []
+
+    for i in range(len(cycle_list)):
+        for j in range(len(cycle_list[i])):
+            all_cycle_edges.append(cycle_edges_forward[i][j])
+            all_cycle_edges.append(cycle_edges_backward[i][j])
+            all_cycle_edges_forward.append(cycle_edges_forward[i][j])
+    
+    shared_cycle_edges_dict = Counter(all_cycle_edges)
+    
+    shared_cycle_edges_list = [edge for edge, count in shared_cycle_edges_dict.items() if count >= 2]
+    
+    return shared_cycle_edges_list,all_cycle_edges_forward
+
+def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,cycle_labels_forward,products_f,products_b):
     """
     Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
     
@@ -333,6 +370,9 @@ def equilibrium_params(cycle_list,cycle_edges_forward,cycle_labels_forward,produ
         
     cycle_edges_forward : list of lists
         each element is a list of the edges going around one direction of a given cycle
+    
+    shared_cycle_edges_list : list
+        list of all the pairs of reversible edges that are shared between at least 2 cycles in G
         
     cycle_labels_forward : list of lists
         each element is a list of the labels going around one direction of a given cycle
@@ -354,32 +394,36 @@ def equilibrium_params(cycle_list,cycle_edges_forward,cycle_labels_forward,produ
     
     """
     num_cycles = len(cycle_list)
-    
     # tracking edges that have had their values altered
     edge_tracker = []
-
-    # for each cycle in cycle_list
+    # count the cycles that have been initialized at equilibrium
+    cycles_done = -1
+    
+    # remove all shared edges from cycle_edges_forward
+    a = set(all_cycle_edges_forward)
+    b = set(shared_cycle_edges_list)
+    new_cycle_edges_forward = list(a.difference(b))        
+    
     for i in range(num_cycles):
-        # choose a random edge in the "forward" direction
-        j = np.random.randint(len(cycle_list[i])-1,size=1)[0]
-        edge = cycle_edges_forward[i][j]
-        edge_label = cycle_labels_forward[i][j]
-
-        # if the edge is already in edge_tracker from another, choose another edge
-        if edge in edge_tracker:
-            k = j
-            exclude_j = list(range(1,k)) + list(range(k+1, len(cycle_list[i])-1))
-            j = np.random.randint(exclude_j,size=1)[0]
+        
+        while cycles_done < i:
+            # choose a random edge in the "forward" direction
+            j = np.random.randint(len(cycle_list[i]),size=1)[0]
             edge = cycle_edges_forward[i][j]
             edge_label = cycle_labels_forward[i][j]
-        
-        # recalculate edge label using the cycle condition
-        edge_label = 1/(products_f[i]/(edge_label*products_b[i]))
-        cycle_labels_forward[i][j] = edge_label
-        
-        # add that edge to edge_tracker
-        edge_tracker.append(cycle_edges_forward[i][j])
-    
+            
+            # if the edge is not shared with other cycles, recalculate its value
+            if ((edge in new_cycle_edges_forward)==True):
+                # recalculate edge label using the cycle condition
+                edge_label = 1/(products_f[i]/(edge_label*products_b[i]))
+                cycle_labels_forward[i][j] = edge_label
+                # add that edge to edge_tracker
+                edge_tracker.append(cycle_edges_forward[i][j])
+                cycles_done += 1
+                print("cycles done: " + str(cycles_done))
+            else:
+                continue
+            
     return cycle_labels_forward, edge_tracker
 
 def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
