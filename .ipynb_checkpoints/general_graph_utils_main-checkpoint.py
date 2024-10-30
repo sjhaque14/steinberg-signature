@@ -428,7 +428,7 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
 
 def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, label_list):
     """
-    Initializes a graph with a particular parameterization in an equilibrium steady state
+    Changes the parameterization of a NetworkX graph object from its initial parameterization
     
     Parameters
     ----------
@@ -452,10 +452,10 @@ def reformat_labels(cycle_list, cycle_labels_forward, edge_tracker, label_dict, 
     -------
     
     label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels (updated with equilibrium changes)
+        keys: edges in G represented as tuple (source,sink), values: edge labels (updated)
         
     label_list : 1D numpy array
-        list of edge labels in G (updated with equilibrium changes
+        list of edge labels in G (updated)
     """
     
     num_cycles = len(cycle_list)
