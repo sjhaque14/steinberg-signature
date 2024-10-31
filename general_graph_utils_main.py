@@ -528,7 +528,7 @@ def Laplacian_all(edge_list,label_list,node_list):
 
 def steady_state_spectrum(L):
     """
-    Calculates the steady-state distribution for the any linear framework graph by computing the right eigenvector associated with eigenvalue 0.
+    Calculates the steady-state distribution for the any linear framework graph by computing the right eigenvector associated with eigenvalue 0 and normalizing it by the sum of all entries
     
     Parameters
     ----------
