@@ -216,8 +216,8 @@ def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
     
     # populate arrays with analytical solution to autocorrelation function
     for i in range(len(tau)):
-        a_13[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
-        a_31[i] = (s_t**alpha @ list_result[i]) @ (delta_u_star @ s ** beta)
+        a_13[i] = np.around((s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha), decimals=5)
+        a_31[i] = np.around((s_t**alpha @ list_result[i]) @ (delta_u_star @ s ** beta), decimals=5)
         
     return a_13, a_31
 
