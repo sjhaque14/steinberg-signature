@@ -543,13 +543,8 @@ def steady_state_spectrum(L):
     """
     
     eigvals, eigvecs = scipy.linalg.eig(L)
-    x = eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)
+    pi_all = eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)
     
-    pi_all = np.zeros((len(x)),dtype=np.float128)
-
-    for i in range(len(x)):
-        pi_all[i] = x[i]
-
     return pi_all
 
 def G_duplicate_data_structures(G,node_list,edge_list,label_list,label_dict,size,L):
