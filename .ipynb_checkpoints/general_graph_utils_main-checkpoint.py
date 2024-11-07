@@ -620,3 +620,80 @@ def assign_labels(G, label_dict):
         G[e[0]][e[1]]['weight'] = label_dict[e]
         
     return G
+
+def make_observable(node_list):
+    """
+    Create the observable vector f for a graph with size num_nodes = len(node_list). The observable vector is a function on the states of the Markov process defined for the linear framework graph: when the system exists in state k, f takes vaue f_k.
+    
+    Parameters
+    ----------
+    node_list : 1D array
+        list of nodes in the graph
+    
+    Returns
+    -------
+    f : 1D array
+        list of values that the observable f assumes based on the state the Markov process exists in at a given time t 
+    
+    """
+    
+    num_nodes = len(node_list)
+    
+    f = np.zeros(num_nodes,dtype=np.float128)
+    
+    for i in range(0,num_nodes):
+        f[i] = 3+(2*i)
+    
+    return f
+
+def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
+    """
+    Numerically calculates the asymmetric autocorrelation functions A^{1,3}(\tau) and A^{3,1}(\tau) for a particular Laplacian matrix. This function works for a linear framework graph of any size.
+    
+    Parameters
+    ----------
+    signal : 1D array
+        vector of possible values of signal S = (S(1), ..., S(N))
+        
+    L : NxN array
+        column-based Laplacian matrix of linear framework graph with N vertices
+    
+    tau : 1D array
+        range of intervals between values of signal along integration interval
+        
+    pi : 1D array
+         the steady state distribution for a linear framework graph with N vertices
+    
+    alpha, beta : scalar
+        asymmetric exponents applied to signal (default: alpha=1, beta=3)
+    
+    Returns
+    -------
+    a_13 : 1D array
+        forward autocorrelation function values
+    
+    a_31 : 1D array
+        reverse autocorrelation function values
+    
+    """
+    # initialize forward and reverse autocorrelation function arrays
+    a_13 = np.zeros(len(tau),dtype=np.float128)
+    a_31 = np.zeros(len(tau),dtype=np.float128)
+    
+    # define the signal vectors
+    # define the signal vectors
+    s_t = np.array([signal],dtype=np.float128) # row vector
+    s = s_t.T # column vector
+    
+    # create the diagonal steady state matrix 
+    delta_u_star = np.diag(pi)
+    
+    # vectorize the Laplacian matrix multiplied by each value in the vector tau
+    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
+    
+    # populate arrays with analytical solution to autocorrelation function
+    for i in range(len(tau)):
+        a_13[i] = (s_t**beta @ list_result[i]) @ (delta_u_star @ s ** alpha)
+        a_31[i] = (s_t**alpha @ list_result[i]) @ (delta_u_star @ s ** beta)
+        
+    return a_13, a_31
