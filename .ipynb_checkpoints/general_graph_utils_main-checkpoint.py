@@ -188,6 +188,41 @@ def get_labels(G):
     
     return label_dict, label_list
 
+def get_labels_ones(G):
+    """
+    Extracts the label information for each edge in a NetworkX graph object. If G not labeled, all labels are assigned as 1.0.
+    
+    Parameters
+    ----------
+    G : NetworkX DiGraph object
+        directed graph
+            
+    Returns
+    -------
+    label_dict : dictionary
+        keys: edges in G represented as tuple (source,sink), values: edge labels
+        
+    label_list : 1D numpy array
+        list of edge labels in G
+        
+    """
+    
+    label_dict = {}
+    
+    # if G weighted/labeled, extract weight information in dictionary form
+    if nx.is_weighted(G)==True:
+        for i in range(len(G.edges())):
+            label_dict[list(G.edges())[i]] = G.get_edge_data(list(G.edges)[i][0],list(G.edges)[i][1])['weight']
+    
+    # if G not weighted/labeled, sample new edge label for each edge
+    elif nx.is_weighted(G)==False:
+        label_dict = {e: 1.0 for e in G.edges}
+    
+    # create a list of edge labels directly from the dictionary
+    label_list = np.fromiter(label_dict.values(), dtype=float)
+    
+    return label_dict, label_list
+
 def get_cycle_labels_edges(cycle_list,label_dict):
     """
     Compartmentalizes, for each cycle, the edges involved and their respective edge labels into separate data structures.
