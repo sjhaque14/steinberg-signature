@@ -395,7 +395,7 @@ def shared_edges_cycles(cycle_list, cycle_edges_forward, cycle_edges_backward):
     
     return shared_cycle_edges_list,all_cycle_edges_forward
 
-def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,cycle_labels_forward,products_f,products_b):
+def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,all_cycle_edges_forward,cycle_labels_forward,products_f,products_b):
     """
     Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
     
@@ -409,6 +409,9 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
     
     shared_cycle_edges_list : list
         list of all the pairs of reversible edges that are shared between at least 2 cycles in G
+    
+    all_cycle_edges_forward : list
+        list of all the edge tuples that are recorded in cycle_edges_forward
         
     cycle_labels_forward : list of lists
         each element is a list of the labels going around one direction of a given cycle
