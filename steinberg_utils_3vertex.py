@@ -169,6 +169,31 @@ def cycle_affinity_K(params):
 
 ## HIGHER-ORDER AUTOCORRELATION FUNCTIONS ##
 
+def define_tau_range(L):
+    """
+    Produces a range of tau values for the calculation of asymmetric autocorrelation functions. Determines the maximal value of tau using the mixing time of the continuous time Markov process, which gives a reasonable estimate for the time it takes for the process to approach its stationary distribution.
+    
+    Parameters
+    ----------
+    L : NxN array
+        column-based Laplacian matrix of linear framework graph with N vertices
+        
+    Returns
+    -------
+    
+    tau : 1D array
+        range of intervals between values of signal along integration interval
+    
+    tau_max : scalar
+        the maximal value of the tau array, given by the mixing time of the continuous time Markov process with generator L
+    """
+    
+    eigvals = np.sort(np.real(np.linalg.eigvals(-L)))
+    lambda_1 = eigvals[1]  # skip eigvals[0] = 0 (steady state)
+    tau_max = 2 / lambda_1
+    tau = np.linspace(0.01, tau_max, num=500)  # or np.arange with adaptive step
+    return tau, tau_max
+
 def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
     """
     Numerically calculates the asymmetric autocorrelation functions A^{1,3}(\tau) and A^{3,1}(\tau) for a particular Laplacian matrix. This function works for a linear framework graph of any size.
