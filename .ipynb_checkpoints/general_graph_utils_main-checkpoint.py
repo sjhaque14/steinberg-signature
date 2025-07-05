@@ -445,7 +445,6 @@ def equilibrium_params(cycle_list,
 
     return cycle_labels_forward, edge_tracker, index_tracker
 
-    cycle_list : list of lists
 def reformat_labels(cycle_list, 
                     cycle_edges_forward, 
                     cycle_labels_forward, 
