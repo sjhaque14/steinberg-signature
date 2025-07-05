@@ -356,7 +356,9 @@ def calculate_affinities(products_f, products_b, cycle_list):
     
     return total_affinities
 
-def shared_edges_cycles(cycle_list, cycle_edges_forward, cycle_edges_backward):
+def shared_edges_cycles(cycle_list, 
+                        cycle_edges_forward, 
+                        cycle_edges_backward):
     """
     Returns a list of all edges that are mutual to more than one cycle in G
     
@@ -398,58 +400,59 @@ def shared_edges_cycles(cycle_list, cycle_edges_forward, cycle_edges_backward):
 def equilibrium_params(cycle_list,
                          cycle_edges_forward,
                          cycle_labels_forward,
-                         cycle_edges_backward,
                          cycle_labels_backward,
                          shared_cycle_edges_list):
     """
-    Zeroes the affinity of each fundamental cycle by solving for one
-    unshared edge label per cycle.
-    Returns updated forward/backward labels plus trackers.
+    Zero the affinity of each fundamental cycle by solving one unshared edge label.
+    Returns updated forward labels plus trackers.
     """
     edge_tracker = []
     index_tracker = []
 
-    for i, nodes in enumerate(cycle_list):
-        # Identify candidate edges: unshared AND not yet fixed
+    for i in range(len(cycle_list)):
+        # 1) Find candidate forward edges for this cycle:
         candidates = [
-            (j, edge) for j, edge in enumerate(cycle_edges_forward[i])
-            if edge not in shared_cycle_edges_list and edge not in edge_tracker
+            (j, e) for j, e in enumerate(cycle_edges_forward[i])
+            if e not in shared_cycle_edges_list and e not in edge_tracker
         ]
         if not candidates:
             raise RuntimeError(f"No available edge to fix cycle {i}")
 
-        # Pick one candidate (could be random or the first)
+        # 2) Pick the first candidate (or use random.choice(candidates) if you prefer)
         j, edge = candidates[0]
         old_label = cycle_labels_forward[i][j]
 
-        # Recompute products with current labels
-        f_prod = np.prod(cycle_labels_forward[i])
-        b_prod = np.prod(cycle_labels_backward[i])
+        # 3) Compute the original products for this cycle
+        f0 = np.prod(cycle_labels_forward[i])
+        b0 = np.prod(cycle_labels_backward[i])
 
-        # Solve for the new label so log(f'/b') = 0 ⟹ f'/b' = 1
-        # f' = f_prod / old_label * new_label, so new_label = b_prod / (f_prod / old_label)
-        new_label = b_prod / (f_prod / old_label)
+        # 4) Solve for the new forward‐label so that f'/b' = 1
+        #    new_label = b0 / (f0 / old_label)
+        new_label = b0 / (f0 / old_label)
 
-        # Update both forward and backward directions
+        # 5) Update *only* the forward label
         cycle_labels_forward[i][j] = new_label
-        # Find the index k in backward list matching reversed edge
-        rev_edge = (edge[1], edge[0])
-        k = cycle_edges_backward[i].index(rev_edge)
-        cycle_labels_backward[i][k] = new_label
 
-        # Track which edge was changed
+        # 6) Track what we changed
         edge_tracker.append(edge)
         index_tracker.append((i, j))
 
-        # Diagnostic: Should now be zero
-        f2 = np.prod(cycle_labels_forward[i])
-        b2 = np.prod(cycle_labels_backward[i])
-        print(f"Cycle {i} affinity after solve:", np.log(f2 / b2))
+        # 7) Diagnostic check: should be zero (within machine precision)
+        f1 = np.prod(cycle_labels_forward[i])
+        b1 = np.prod(cycle_labels_backward[i])
+        affinity = np.log(f1 / b1)
+        print(f"Cycle {i} affinity after solve:", affinity)
 
-    return cycle_labels_forward, cycle_labels_backward, edge_tracker, index_tracker
+    return cycle_labels_forward, edge_tracker, index_tracker
 
-
-def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,all_cycle_edges_forward,cycle_labels_forward,cycle_labels_backward,products_f,products_b):
+def equilibrium_params_2(cycle_list,
+                         cycle_edges_forward,
+                         shared_cycle_edges_list,
+                         all_cycle_edges_forward,
+                         cycle_labels_forward,
+                         cycle_labels_backward,
+                         products_f,
+                         products_b):
     """
     Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
     
@@ -530,7 +533,13 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
             
     return cycle_labels_forward, edge_tracker, index_tracker
 
-def reformat_labels(cycle_list, cycle_edges_forward, cycle_labels_forward, edge_tracker, index_tracker, label_dict, label_list):
+def reformat_labels(cycle_list, 
+                    cycle_edges_forward, 
+                    cycle_labels_forward, 
+                    edge_tracker, 
+                    index_tracker, 
+                    label_dict, 
+                    label_list):
     """
     Changes the parameterization of a NetworkX graph object from its initial parameterization
     
