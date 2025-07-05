@@ -395,7 +395,61 @@ def shared_edges_cycles(cycle_list, cycle_edges_forward, cycle_edges_backward):
     
     return shared_cycle_edges_list,all_cycle_edges_forward
 
-def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,all_cycle_edges_forward,cycle_labels_forward,products_f,products_b):
+def equilibrium_params(cycle_list,
+                         cycle_edges_forward,
+                         cycle_labels_forward,
+                         cycle_edges_backward,
+                         cycle_labels_backward,
+                         shared_cycle_edges_list):
+    """
+    Zeroes the affinity of each fundamental cycle by solving for one
+    unshared edge label per cycle.
+    Returns updated forward/backward labels plus trackers.
+    """
+    edge_tracker = []
+    index_tracker = []
+
+    for i, nodes in enumerate(cycle_list):
+        # Identify candidate edges: unshared AND not yet fixed
+        candidates = [
+            (j, edge) for j, edge in enumerate(cycle_edges_forward[i])
+            if edge not in shared_cycle_edges_list and edge not in edge_tracker
+        ]
+        if not candidates:
+            raise RuntimeError(f"No available edge to fix cycle {i}")
+
+        # Pick one candidate (could be random or the first)
+        j, edge = candidates[0]
+        old_label = cycle_labels_forward[i][j]
+
+        # Recompute products with current labels
+        f_prod = np.prod(cycle_labels_forward[i])
+        b_prod = np.prod(cycle_labels_backward[i])
+
+        # Solve for the new label so log(f'/b') = 0 ⟹ f'/b' = 1
+        # f' = f_prod / old_label * new_label, so new_label = b_prod / (f_prod / old_label)
+        new_label = b_prod / (f_prod / old_label)
+
+        # Update both forward and backward directions
+        cycle_labels_forward[i][j] = new_label
+        # Find the index k in backward list matching reversed edge
+        rev_edge = (edge[1], edge[0])
+        k = cycle_edges_backward[i].index(rev_edge)
+        cycle_labels_backward[i][k] = new_label
+
+        # Track which edge was changed
+        edge_tracker.append(edge)
+        index_tracker.append((i, j))
+
+        # Diagnostic: Should now be zero
+        f2 = np.prod(cycle_labels_forward[i])
+        b2 = np.prod(cycle_labels_backward[i])
+        print(f"Cycle {i} affinity after solve:", np.log(f2 / b2))
+
+    return cycle_labels_forward, cycle_labels_backward, edge_tracker, index_tracker
+
+
+def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,all_cycle_edges_forward,cycle_labels_forward,cycle_labels_backward,products_f,products_b):
     """
     Calculates the cycle affinity (e.g. thermodynamic force) for each cycle in a graph
     
@@ -406,7 +460,7 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
         
     cycle_edges_forward : list of lists
         each element is a list of the edges going around one direction of a given cycle
-    
+            
     shared_cycle_edges_list : list
         list of all the pairs of reversible edges that are shared between at least 2 cycles in G
     
@@ -415,6 +469,9 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
         
     cycle_labels_forward : list of lists
         each element is a list of the labels going around one direction of a given cycle
+    
+    cycle_labels_backward : list of lists
+        each element is a list of the labels going around the opposite direction of a given cycle
     
     products_f : 1D array
         each element is the product of labels corresponding to the forward traversal of each cycle
@@ -465,6 +522,9 @@ def equilibrium_params_2(cycle_list,cycle_edges_forward,shared_cycle_edges_list,
                 edge_tracker.append(cycle_edges_forward[i][j])
                 index_tracker.append(j)
                 cycles_done += 1
+                new_f, new_b = calculate_cycle_products([cycle_labels_forward[i]], [cycle_labels_backward[i]])
+                affinity = np.log(new_f[0] / new_b[0])
+                print(f"Cycle {i} affinity after solve:", affinity)
             else:
                 continue
             
