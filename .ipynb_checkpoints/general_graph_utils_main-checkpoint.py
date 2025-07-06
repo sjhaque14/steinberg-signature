@@ -119,20 +119,19 @@ def get_nodes(G):
 
 def get_edges(G):
     """
-    Returns an array of edges in a NetworkX graph object (directed). Each edge is represented as a list [source,sink]
-        
+    Returns a list of edges in a NetworkX DiGraph, each as a (source, sink) tuple.
+    
     Parameters
     ----------
-    G : NetworkX DiGraph object
-        directed graph
+    G : networkx.DiGraph
+        Directed graph object.
     
     Returns
     -------
-    edge_list : NumPy array
-        list of lists of directed edges (each directed edge is represented as a list)
+    edge_list : list of tuple
+        Each tuple is (source, sink).
     """
-    edge_list = np.array(G.edges)
-    return edge_list
+    return list(G.edges())
 
 def get_cycles(G_ud):
     """
@@ -445,58 +444,23 @@ def equilibrium_params(cycle_list,
 
     return cycle_labels_forward, edge_tracker, index_tracker
 
-def reformat_labels(cycle_list, 
-                    cycle_edges_forward, 
-                    cycle_labels_forward, 
-                    edge_tracker, 
-                    index_tracker, 
-                    label_dict, 
-                    label_list):
+def reformat_labels(edge_tracker,
+                    index_tracker,
+                    cycle_labels_forward,
+                    label_dict,
+                    edge_order):
     """
-    Changes the parameterization of a NetworkX graph object from its initial parameterization
-    
-    Parameters
-    ----------
-    
-    cycle_list : list of lists
-        each element is a list of the nodes connected in a given cycle.
-    
-    cycle_edges_forward : list of lists
-        each element is a list of the edges going around one direction of a given cycle
-    
-    cycle_labels_forward : list of lists
-        updated with new values for certain edges
-        
-    edge_tracker : list of lists
-        list of edges with labels that were changed to initialize the system in an equilibrium steady state
-    
-    index_tracker: list
-        list of second indices of altered edges in cycle_labels_forward
-        
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels
-        
-    label_list : 1D numpy array
-        list of edge labels in G
-    
-    Returns
-    -------
-    
-    label_dict : dictionary
-        keys: edges in G represented as tuple (source,sink), values: edge labels (updated)
-        
-    label_list : 1D numpy array
-        list of edge labels in G (updated)
+    Update label_dict with the new forward labels you solved for,
+    and rebuild a NumPy label list in the given edge_order.
     """
     
-    num_cycles = len(cycle_list)
-    
-    for i in range(num_cycles):
-        #print(cycle_edges_forward[i][index_tracker[i]])
-        label_dict[edge_tracker[i]] = cycle_labels_forward[i][index_tracker[i]]
-        
-    label_list = np.fromiter(label_dict.values(), dtype=float)
-    
+    # 1) Apply solved labels back into the dict
+    for (cycle_i, edge_j), edge in zip(index_tracker, edge_tracker):
+        label_dict[edge] = cycle_labels_forward[cycle_i][edge_j]
+
+    # 2) Rebuild the label list in a consistent order
+    label_list = np.array([ label_dict[edge] for edge in edge_order ], dtype=float)
+
     return label_dict, label_list
 
 def Laplacian_all(edge_list,label_list,node_list):
