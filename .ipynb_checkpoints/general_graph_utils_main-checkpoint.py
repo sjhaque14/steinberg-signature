@@ -463,50 +463,49 @@ def reformat_labels(edge_tracker,
 
     return label_dict, label_list
 
-def Laplacian_all(edge_list,label_list,node_list):
+def Laplacian_all(edge_list, label_list, node_list):
     """
-    Calculates the column-based Laplacian matrix for any graph. The entries of the Laplacian are computed using the following mathematical formula:
-    
-    L_{ij}(G) = e_{ij} if i \neq j
-    L_{ij}(G) = -\sum_{v \neq j} e_{vj} if i = j.
-    
+    Builds the column-based Laplacian L for a directed graph G, given:
+      - edge_list: list of (source, sink) tuples
+      - label_list: list of weights for each edge, aligned with edge_list
+      - node_list: list/array of the nodes in G (in consistent order)
+
+    L_ij =  k_{ij}   if i≠j  (rate from j→i)
+    L_jj = -sum_{i≠j} L_ij
+
     Parameters
     ----------
-    edge_list : 1D array
-        list of each edge in the graph object G, each element is a tuple (source,sink)
-    
+    edge_list : sequence of tuples
+        Each tuple is (source, sink).
     label_list : 1D array
-        list of edge labels in the graph
-        
-    node_list : 1D array
-        list of nodes in the graph
-    
+        Rates for each directed edge, same length and order as edge_list.
+    node_list : sequence
+        All nodes of G, in the order you want for rows/cols of L.
+
     Returns
     -------
-    
-    L : num_nodes x num_nodes array
-        the Laplacian matrix of the graph G
-        
+    L : np.ndarray, shape (n, n)
+        The column-based generator (Laplacian) matrix.
     """
-    
-    num_nodes = len(node_list)
-    num_edges = len(edge_list)
-    
-    L = np.zeros(shape=(num_nodes,num_nodes),dtype=np.float128)
-    
-    # off-diagonal entries
-    for x in range(num_edges):
-        k = np.around(edge_list[x][0]-1,decimals=5)
-        j = np.around(edge_list[x][1]-1,decimals=5)
+    n = len(node_list)
+    # Map node label → index in [0, n)
+    node_to_idx = {node: idx for idx, node in enumerate(node_list)}
 
-        L[k,j] = label_list[x]
-    
-    # diagonal entries
-    sums = np.around(-1*np.sum(L,axis=0), decimals=5)
+    L = np.zeros((n, n), dtype=float)
 
-    for i in range(num_nodes):
-        L[i,i] = sums[i]
-    
+    # Fill off-diagonals: for each edge (u→v), add rate k_uv at L[v_index, u_index]?
+    # Note: In many CTMC conventions L_{ij} is rate from j→i; adjust if you use L_{ij}=k_{ij}.
+    for (u, v), k in zip(edge_list, label_list):
+        i = node_to_idx[v]
+        j = node_to_idx[u]
+        L[i, j] = k
+
+    # Fill diagonals so that each column sums to zero
+    # (i.e. L[j, j] = -sum_{i≠j} L[i, j] for each j)
+    col_sums = L.sum(axis=0)
+    for j in range(n):
+        L[j, j] = -col_sums[j]
+
     return L
 
 def steady_state_spectrum(L):
