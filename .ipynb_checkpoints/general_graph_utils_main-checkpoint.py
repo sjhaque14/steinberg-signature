@@ -314,8 +314,8 @@ def calculate_cycle_products(cycle_labels_forward,cycle_labels_backward):
         each element is the product of labels corresponding to the backward traversal of each cycle
         
     """
-    products_f = np.zeros(len(cycle_labels_forward),dtype=np.float128)
-    products_b = np.zeros(len(cycle_labels_backward),dtype=np.float128)
+    products_f = np.zeros(len(cycle_labels_forward))
+    products_b = np.zeros(len(cycle_labels_backward))
 
     for i in range(len(cycle_labels_forward)):
         products_f[i] = np.prod(cycle_labels_forward[i])
@@ -348,7 +348,7 @@ def calculate_affinities(products_f, products_b, cycle_list):
     
     num_cycles = len(cycle_list)
     
-    total_affinities = np.zeros(num_cycles,dtype=np.float128)
+    total_affinities = np.zeros(num_cycles)
     
     for i in range(num_cycles):
         total_affinities[i] = np.log(products_f[i]/products_b[i])
@@ -583,7 +583,7 @@ def make_observable(node_list):
     
     num_nodes = len(node_list)
     
-    f = np.zeros(num_nodes,dtype=np.float128)
+    f = np.zeros(num_nodes)
     
     for i in range(0,num_nodes):
         f[i] = 3+(2*i)
@@ -621,12 +621,12 @@ def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
     
     """
     # initialize forward and reverse autocorrelation function arrays
-    a_13 = np.zeros(len(tau),dtype=np.float128)
-    a_31 = np.zeros(len(tau),dtype=np.float128)
+    a_13 = np.zeros(len(tau))
+    a_31 = np.zeros(len(tau))
     
     # define the signal vectors
     # define the signal vectors
-    s_t = np.array([signal],dtype=np.float128) # row vector
+    s_t = np.array([signal]) # row vector
     s = s_t.T # column vector
     
     # create the diagonal steady state matrix 
