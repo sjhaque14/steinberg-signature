@@ -30,7 +30,7 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
              transition rates in the 3-vertex graph K satisfy the cycle condition
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
-    params = np.zeros(num_params,dtype=np.float128)
+    params = np.zeros(num_params)
     
     # randomly sample the first 5 parameters
     params[:-1] = 10**(np.random.uniform(min_val,max_val, size = num_params-1))
@@ -60,7 +60,7 @@ def random_parameters(min_val=-3,max_val=3,num_params=6):
              order of parameters: a, b, d, c, f, e = params[0], params[1], params[2], params[3], params[4], params[5]
     """
     
-    params = np.zeros(num_params,dtype=np.float128)
+    params = np.zeros(num_params)
     
     params[:] = 10**(np.random.uniform(min_val,max_val, size = num_params))
     
