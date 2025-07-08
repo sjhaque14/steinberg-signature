@@ -10,6 +10,14 @@ from collections import Counter
 
 # Note that the user is required to create both a directed graph object and an undirected graph object. This is because some of the functions in this file require the undirected graph object as an argument (particular the cycle-related functions).
 
+def round_sig(x, sig_figs=4):
+    """
+    Rounds a number to a given number of significant figures
+    """
+    if x == 0:
+        return 0.0
+    return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
+
 def random_graph(n):
     """
     Generates a linear framework graph that is strongly connected and fully reversible. The size of the graph is randomly determined from range (3, n), and the edges are added by randomly selecting a pair of nodes in G.
@@ -180,7 +188,7 @@ def get_labels(G):
     
     # if G not weighted/labeled, sample new edge label for each edge
     elif nx.is_weighted(G)==False:
-        label_dict = {e: np.around(10**(np.random.uniform(-3,3, size = 1)[0]),decimals=5) for e in G.edges}
+        label_dict = {e: round_sig(10**(np.random.uniform(-3,3, size = 1)[0]),sig_figs=4) for e in G.edges}
     
     # create a list of edge labels directly from the dictionary
     label_list = np.fromiter(label_dict.values(), dtype=float)

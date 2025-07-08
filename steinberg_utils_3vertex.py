@@ -12,7 +12,7 @@ import scipy.linalg
 # See Figure 1A. in Haque, Cetiner, Gunawardena 2024 for symbolic edge label assignments. The array params lists these edge labels in the following order: a, b, d, c, f, e.
 
 # Vectorized sig-fig rounding function
-def round_to_sigfigs(arr, sig_figs=4):
+def round_to_sigfigs(array, sig_figs=4):
     """
     Rounds an array to a given number of significant figures.
     """
@@ -22,7 +22,8 @@ def round_to_sigfigs(arr, sig_figs=4):
         return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
     
     vect = np.vectorize(_round)
-    return vect(arr)
+    
+    return vect(array)
 
 def equilibrium_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
     """
