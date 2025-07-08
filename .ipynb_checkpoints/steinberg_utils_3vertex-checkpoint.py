@@ -11,7 +11,20 @@ import scipy.linalg
 
 # See Figure 1A. in Haque, Cetiner, Gunawardena 2024 for symbolic edge label assignments. The array params lists these edge labels in the following order: a, b, d, c, f, e.
 
-def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
+# Vectorized sig-fig rounding function
+def round_to_sigfigs(arr, sig_figs=4):
+    """
+    Rounds an array to a given number of significant figures.
+    """
+    def _round(x):
+        if x == 0:
+            return 0.0
+        return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
+    
+    vect = np.vectorize(_round)
+    return vect(arr)
+
+def equilibrium_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
     """
     Randomly samples transition rates for a 3-vertex graph, K, which satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val). 
     
@@ -38,9 +51,9 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6):
     # allow the 6th parameter (e = params[-1]) to be a free parameter
     params[-1] = (params[1]*params[3]*params[4])/(params[0]*params[2])
                        
-    return params
+    return round_to_sigfigs(params, sig_figs)
 
-def random_parameters(min_val=-3,max_val=3,num_params=6):
+def random_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
     """
     Randomly samples transition rates for a 3-vertex graph, K, which do not necessarily satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val).
     
@@ -64,7 +77,7 @@ def random_parameters(min_val=-3,max_val=3,num_params=6):
     
     params[:] = 10**(np.random.uniform(min_val,max_val, size = num_params))
     
-    return params
+    return round_to_sigfigs(params, sig_figs)
 
 ## LAPLACIAN MATRIX & STEADY STATE DISTRIBUTION ##
 
