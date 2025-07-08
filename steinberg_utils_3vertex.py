@@ -183,18 +183,15 @@ def cycle_affinity_K(params):
 
 ## HIGHER-ORDER AUTOCORRELATION FUNCTIONS ##
 
-def define_tau_range(L, max_points=500, cap_factor=5.0):
+def define_tau_range(L, max_points=500, cap_factor=10.0):
     # infer the slowest rate
     eigs = np.real(np.linalg.eigvals(-L))
     eigs.sort()
     lambda_1 = eigs[1]
     
     # set upper bound but don’t let it explode
-    tau_max = min(cap_factor/lambda_1, 10.0)   # never longer than 10 time-units
-    
-    # choose resolution so Δτ ≈ τ_max / max_points
-    num = min(max_points, int(np.ceil(tau_max / 0.01)))
-    tau = np.linspace(0.01, tau_max, num=num)
+    tau_max = min(cap_factor/lambda_1, 100.0)   # never longer than 100 time-units
+    tau = np.linspace(0.01, tau_max, num=max_points)
     return tau, tau_max
 
 def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
