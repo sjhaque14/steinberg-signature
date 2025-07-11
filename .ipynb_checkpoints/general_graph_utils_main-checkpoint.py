@@ -203,7 +203,7 @@ def get_labels(G):
         label_dict = {e: round_sig(10**(np.random.uniform(-3,3, size = 1)[0]),sig_figs=4) for e in G.edges}
     
     # create a list of edge labels directly from the dictionary
-    label_list = np.fromiter(label_dict.values(), dtype=float)
+    label_list = np.array([ label_dict[e] for e in edge_list ], dtype=float)
     
     return label_dict, label_list
 
@@ -238,7 +238,7 @@ def get_labels_ones(G):
         label_dict = {e: 1.0 for e in G.edges}
     
     # create a list of edge labels directly from the dictionary
-    label_list = np.fromiter(label_dict.values(), dtype=float)
+    label_list = np.array([ label_dict[e] for e in edge_list ], dtype=float)
     
     return label_dict, label_list
 
