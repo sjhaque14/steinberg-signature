@@ -12,7 +12,19 @@ from collections import Counter
 
 def round_sig(x, sig_figs=4):
     """
-    Rounds a number to a given number of significant figures
+    Rounds a number to a given number of significant figures.
+    
+    Parameters
+    ----------
+    x : float
+        number to round
+        
+    sig_figs : integer (default=4)
+        number of sig figs to round to
+        
+    Returns
+    ----------
+    x rounded to the desired number of significant figures
     """
     if x == 0:
         return 0.0
