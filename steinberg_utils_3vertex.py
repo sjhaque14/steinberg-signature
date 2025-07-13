@@ -248,6 +248,31 @@ def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
 
 ## THE STEINBERG SIGNATURE ##
 
+def make_observable(node_list):
+    """
+    Create the observable vector f for a graph with size num_nodes = len(node_list). The observable vector is a function on the states of the Markov process defined for the linear framework graph: when the system exists in state k, f takes vaue f_k.
+    
+    Parameters
+    ----------
+    node_list : 1D array
+        list of nodes in the graph
+    
+    Returns
+    -------
+    f : 1D array
+        list of values that the observable f assumes based on the state the Markov process exists in at a given time t 
+    
+    """
+    
+    num_nodes = len(node_list)
+    
+    f = np.zeros(num_nodes)
+    
+    for i in range(0,num_nodes):
+        f[i] = 3+(2*i)
+    
+    return f
+
 def numerical_area(t,t_rev):
     """
     Calculates the analytical solution for forward and reverse higher-order autocorrelation functions for a particular Laplacian matrix
@@ -273,99 +298,3 @@ def numerical_area(t,t_rev):
         reverse autocorrelation function values
     """
     return np.abs(np.trapz(t)-np.trapz(t_rev))
-
-def Laplacian_spectrum(L):
-    """
-    Returns the eigenvalues, left eigenvectors, and right eigenvectors (otherwise known as the spectrum) of the Laplacian matrix for a 3-vertex graph. The eigenvectors are normalized with the following conditions. 
-    
-    u_1 (right eigenvector of the 0 eigenvalue): normalized such that all elements sum to 1
-    v_1 (left eigenvector of the 0 eigenvalue): normalized such that all elements = 1
-    
-    u_n, v_n (n>1): normalized such that they satisfy a bi-orthonormal condition (see below)
-    
-    v_i * u_j = \delta_ij (Kronecker delta function)
-    
-    Parameters
-    ----------
-
-    L : 3x3 array
-        column-based Laplacian matrix of 3-vertex linear framework graph
-        
-    Returns
-    -------
-    
-    lambda_1 : np.complex128
-        0 eigenvalue (largest eigenvalue)
-    
-    u_1 : numpy.ndarray
-        right eigenvector for the 0 eigenvalue. Also known as the steady state or invariant distribution of the Laplacian
-        
-    v_1 : numpy.ndarray
-        left eigenvector for the 0 eigenvalue. Also known as the all ones vector
-        
-    lambda_2 : np.complex128
-        smallest eigenvalue (largest negative eigenvalue)
-    
-    u_2 : numpy.ndarray
-        right eigenvector for \lambda_2. Normalized such that v_2 * u_2 = 1
-        
-    v_2 : numpy.ndarray
-        left eigenvector for the \lambda_2. Normalized such that v_2 * u_2 = 1
-        
-    lambda_3 : np.complex128
-        middle eigenvalue
-    
-    u_3 : numpy.ndarray
-        right eigenvector for \lambda_3. Normalized such that v_3 * u_3 = 1
-        
-    v_3 : numpy.ndarray
-        left eigenvector for the \lambda_3. Normalized such that v_3 * u_3 = 1
-    
-    """
-    # Define eigenvalues, left eigenvectors (v_i) and right eigenvectors (u_i)
-    eigvals, left_eigvecs, right_eigvecs = scipy.linalg.eig(L, left=True, right=True)
-    
-    # Identify the index of the 0 eigenvalue and define it as lambda_1
-    idx_1 = np.argmax(eigvals)
-    lambda_1 = eigvals[idx_1]
-
-    # Delete this eigenvalue from eigvals
-    eigvals_other = np.delete(eigvals, idx_1)
-
-    # Define the right u_1 and left v_1 eigenvectors associated with lambda_1
-    u_1 = right_eigvecs[:,idx_1]
-    v_1 = left_eigvecs[:,idx_1]
-
-    # Normalize u_1 and v_1
-    normalization_1 = sum(u_1)
-    u_1 = u_1/normalization_1
-    v_1 = v_1/v_1
-
-    # Delete eigenvectors u_1 and v_1 from their respective arrays
-    right_eigvecs_other = np.delete(right_eigvecs, idx_1, axis=1)
-    left_eigvecs_other = np.delete(left_eigvecs, idx_1, axis=1)
-
-    # Identify indexes for second and third eigenvalues
-    idx_2 = np.argmin(eigvals_other)
-    idx_3 = np.argmax(eigvals_other)
-    
-    # Define lambda_2 and lambda_3
-    lambda_2 = eigvals_other[idx_2]
-    lambda_3 = eigvals_other[idx_3]
-
-    # Define left and right eigenvectors for lambda_2 and normalize appropriately
-    u_2 = right_eigvecs_other[:,idx_2]
-    v_2 = left_eigvecs_other[:,idx_2]
-    normalization_2 = np.dot(u_2, v_2)
-    u_2 = u_2/normalization_2
-    v_2 = v_2/normalization_2
-
-    # Define left and right eigenvectors for lambda_3 and normalize appropriately
-    u_3 = right_eigvecs_other[:,idx_3]
-    v_3 = left_eigvecs_other[:,idx_3]
-
-    normalization_3 = np.dot(u_3, v_3)
-    u_3 = u_3/normalization_3
-    v_3 = v_3/normalization_3
-
-    return lambda_1, u_1, v_1, lambda_2, u_2, v_2, lambda_3, u_3, v_3
