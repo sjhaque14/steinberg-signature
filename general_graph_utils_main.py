@@ -474,10 +474,10 @@ def reformat_labels(edge_tracker,
                     index_tracker,
                     cycle_labels_forward,
                     label_dict,
-                    edge_order):
+                    edge_list):
     """
     Update label_dict with the new forward labels you solved for,
-    and rebuild a NumPy label list in the given edge_order.
+    and rebuild a NumPy label list in the given edge_list.
     """
     
     # 1) Apply solved labels back into the dict
@@ -485,7 +485,7 @@ def reformat_labels(edge_tracker,
         label_dict[edge] = cycle_labels_forward[cycle_i][edge_j]
 
     # 2) Rebuild the label list in a consistent order
-    label_list = np.array([ label_dict[edge] for edge in edge_order ], dtype=float)
+    label_list = np.array([ label_dict[edge] for edge in edge_list ], dtype=float)
 
     return label_dict, label_list
 
