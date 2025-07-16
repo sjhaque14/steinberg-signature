@@ -172,7 +172,7 @@ def get_cycles(G_ud):
     
     return cycle_list
 
-def get_labels(G):
+def get_labels(G,edge_list):
     """
     Extracts the label information for each edge in a NetworkX graph object. If G not labeled, labels are sampled as 10^x, where x is sampled uniformly between -3 and 3.
     
