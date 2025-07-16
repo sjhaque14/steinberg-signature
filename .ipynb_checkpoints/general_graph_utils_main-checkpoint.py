@@ -180,6 +180,9 @@ def get_labels(G,edge_list):
     ----------
     G : NetworkX DiGraph object
         directed graph
+        
+    edge_list : list of tuple
+        Each tuple is (source, sink).
             
     Returns
     -------
@@ -207,7 +210,7 @@ def get_labels(G,edge_list):
     
     return label_dict, label_list
 
-def get_labels_ones(G):
+def get_labels_ones(G,edge_list):
     """
     Extracts the label information for each edge in a NetworkX graph object. If G not labeled, all labels are assigned as 1.0.
     
@@ -215,7 +218,10 @@ def get_labels_ones(G):
     ----------
     G : NetworkX DiGraph object
         directed graph
-            
+    
+    edge_list : list of tuple
+        Each tuple is (source, sink).
+        
     Returns
     -------
     label_dict : dictionary
