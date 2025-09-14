@@ -4,11 +4,6 @@ from tqdm import tqdm
 import networkx as nx
 import scipy.linalg
 
-plt.rc("text", usetex=False)
-plt.rc("font", family = "serif",size=14)
-plt.rc("figure",figsize=(12,10))
-%config InlineBackend.figure_format = 'retina'
-
 def round_sig(x, sig_figs=4):
     """
     Rounds a number to a given number of significant figures.

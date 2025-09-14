@@ -4,11 +4,6 @@ from tqdm import tqdm
 import networkx as nx
 import scipy.linalg
 
-plt.rc("text", usetex=False)
-plt.rc("font", family = "serif",size=14)
-plt.rc("figure",figsize=(12,10))
-%config InlineBackend.figure_format = 'retina'
-
 def round_sig(x, sig_figs=4):
     """
     Rounds a number to a given number of significant figures.
@@ -62,6 +57,18 @@ def eq_params_k4():
     return labels_f, labels_r
 
 def lap_k4(labels_f, labels_r):
+    """
+    Computes the Laplacian matrix for a 4-state single-cycle graph
+    (k12, k23, k34, k41) and (k21, k32, k43, k14), ensuring zero cycle affinity.
+
+    Returns
+    -------
+    labels_f : list of 4 floats
+        Forward rates: [k12, k23, k34, k41]
+    labels_r : list of 4 floats
+        Reverse rates: [k21, k32, k43, k14]
+    """
+    
     # labels_f = k12, k23, k34, k41
     k12, k23, k34, k41 = labels_f[0], labels_f[1], labels_f[2], labels_f[3]
     # labels_r = k21, k32, k43, k14
@@ -71,7 +78,19 @@ def lap_k4(labels_f, labels_r):
     
     return lap
 
+def spec_any(lap):
+    """
+    Computes the steady-state distribution directly from the spectrum of a given Laplacian matrix. This function works for a linear framework graph of any size.
+    """
+    eigvals, eigvecs = scipy.linalg.eig(lap)
+    v = eigvecs[:, np.argmin(np.abs(eigvals))].real
+    pi = v / v.sum()
+    return pi
+
 def define_tau_range(L, max_points=500, cap_factor=10.0):
+    """
+    Computes the appropriate tau range based on the mixing time of the Markov process specified by the graph G. This function works for a linear framework graph of any size.
+    """
     # infer the slowest rate
     eigs = np.real(np.linalg.eigvals(-L))
     eigs.sort()
@@ -82,7 +101,59 @@ def define_tau_range(L, max_points=500, cap_factor=10.0):
     tau = np.linspace(0.01, tau_max, num=max_points)
     return tau, tau_max
 
-# most reliable version of the autocorrelation function
+# analytical autocorrelation function from Eq. 21 in paper
+
+def asymmetric_autocorrelation(signal,L,tau,alpha=1,beta=3):
+    """
+    Numerically calculates the asymmetric autocorrelation functions A^{1,3}(tau) and A^{3,1}(tau) for a particular Laplacian matrix. This function works for a linear framework graph of any size.
+    
+    Parameters
+    ----------
+    signal : 1D array
+        vector of possible values of signal S = (S(1), ..., S(N))
+        
+    L : NxN array
+        column-based Laplacian matrix of linear framework graph with N vertices
+    
+    tau : 1D array
+        range of intervals between values of signal along integration interval
+    
+    alpha, beta : scalar
+        asymmetric exponents applied to signal (default: alpha=1, beta=3)
+    
+    Returns
+    -------
+    a_13 : 1D array
+        forward autocorrelation function values
+    
+    a_31 : 1D array
+        reverse autocorrelation function values
+    
+    """
+    # initialize forward and reverse autocorrelation function arrays
+    a_13 = np.zeros(len(tau),dtype=float)
+    a_31 = np.zeros(len(tau),dtype=float)
+    
+    # define the signal vectors
+    s_t = np.array([signal],dtype=float) # row vector
+    s = s_t.T # column vector
+    
+    # create the diagonal steady state matrix
+    # calculate the stationary distribution of the Markov process
+    pi = np.array(spec_any(L))
+    delta_u_star = np.diag(pi)
+    
+    # vectorize the Laplacian matrix multiplied by each value in the vector tau
+    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
+    
+    # populate arrays with analytical solution to autocorrelation function
+    for i in range(len(tau)):
+        a_13[i] = ((s_t**beta) @ list_result[i]) @ (delta_u_star @ (s ** alpha))
+        a_31[i] = ((s_t**alpha) @ list_result[i]) @ (delta_u_star @ (s ** beta))
+        
+    return a_13, a_31
+    
+# older version of the autocorrelation function from previous simulations (compares well with above version)
 
 def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
     """
@@ -109,7 +180,7 @@ def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
         reverse autocorrelation function values
     
     """
-    f = np.array([observable],dtype=np.float128)
+    f = np.array([observable],dtype=)
     fstar = f.T
     
     # calculate the stationary distribution of the Markov process
@@ -117,8 +188,8 @@ def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
     pi = np.array([eigvecs[:,np.argmin(np.abs(eigvals))].real/sum(eigvecs[:,np.argmin(np.abs(eigvals))].real)]).T
     
     # initialize forward and reverse autocorrelation function arrays
-    t = np.zeros(len(tau_n),dtype=np.float128)
-    t_rev = np.zeros(len(tau_n),dtype=np.float128)
+    t = np.zeros(len(tau_n),dtype=float)
+    t_rev = np.zeros(len(tau_n),dtype=float)
     
     list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau_n))
     
@@ -128,86 +199,3 @@ def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
         t_rev[i] = f**beta @ list_result[i] @(fstar ** alpha * pi)
         
     return t, t_rev
-
-###### SIMULATION LOOP #######
-
-# equilibrium parameters
-
-labels_f_eq, labels_r_eq = eq_params_k4()
-print(labels_f_eq)
-print(labels_r_eq)
-
-labels_f_eq1 = labels_f_eq.copy()
-labels_r_eq1 = labels_r_eq.copy()
-
-aff = np.abs(np.log(np.prod(labels_f_eq)/np.prod(labels_r_eq)))
-print(aff)
-
-labels_f = labels_f_eq1.copy()
-labels_r = labels_r_eq1.copy()
-
-# autocorr settings
-signal = [3,5,7,9]
-alpha, beta  = 1, 3
-
-# arrays for tracking aff, area, and eigs
-N = 2000
-affinities = np.empty(N, dtype=float)
-areas = np.empty(N, dtype=float)
-eigvals_all_r = np.zeros((N, 4), dtype=np.float128)
-eigvals_all_c = np.zeros((N, 4), dtype=np.float128)
-
-# edge to perturb
-edge_idx = 1
-perturb_edge = labels_f[edge_idx] # labels_f[1] = k23
-
-for i in tqdm(range(0,N)):
-    
-    labels_f[edge_idx] = perturb_edge
-    
-    lap = lap_k4(labels_f, labels_r)
-    
-    aff = np.abs(np.log(np.prod(labels_f)/np.prod(labels_r)))
-    affinities[i] = aff
-    
-    tau, _ = define_tau_range(lap, max_points=500, cap_factor=10.0)
-    a13, a31 = autocorrelation_analytical(signal,lap,tau,alpha=1,beta=3)
-    areas[i] = np.abs(np.trapz(a13)-np.trapz(a31))
-    
-    # Track eigenvalues (real part)
-    eigvals = scipy.linalg.eigvals(lap)
-    eigvals_all_r[i, :] = np.sort(eigvals.real)
-    eigvals_all_c[i, :] = np.sort(eigvals.imag)
-    
-    perturb_edge *= 1.01
-    
-# Steinberg curve plot
-plt.plot(np.abs(affinities),areas,label=r'$\mathcal{I}^{1,3}(G)$',linewidth=1, color= 'black')
-plt.xlabel(r"$\tilde{A}(C)$")
-plt.ylabel(r"$\mathcal{I}^{1,3}(G)$")
-plt.show()
-
-# Eigenvalues plots
-plt.figure(figsize=(12,5))
-
-# Real part
-plt.subplot(1,2,1)
-for j in range(4):
-    plt.plot(affinities, eigvals_all_r[:, j], label=f"Re(λ{j+1})")
-plt.xlabel("Affinity")
-plt.ylabel("Re(λ)")
-plt.title("Real Parts of Eigenvalues")
-plt.legend()
-
-# Imaginary part
-plt.subplot(1,2,2)
-for j in range(4):
-    plt.plot(affinities, eigvals_all_c[:, j], label=f"Im(λ{j+1})")
-plt.xlabel("Affinity")
-plt.ylabel("Im(λ)")
-plt.title("Imaginary Parts of Eigenvalues")
-plt.legend()
-
-plt.tight_layout()
-plt.savefig(f"eigenvalue_evolution_edge_{edge_idx}.png", dpi=300)
-plt.show()
