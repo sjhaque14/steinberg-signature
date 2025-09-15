@@ -180,7 +180,7 @@ def autocorrelation_analytical(observable,L,tau_n,alpha=1,beta=3):
         reverse autocorrelation function values
     
     """
-    f = np.array([observable],dtype=)
+    f = np.array([observable],dtype=float)
     fstar = f.T
     
     # calculate the stationary distribution of the Markov process
