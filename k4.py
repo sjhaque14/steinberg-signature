@@ -78,7 +78,7 @@ def lap_k4(labels_f, labels_r):
     
     return lap
 
-def spec_any(lap):
+def pi_dist(lap):
     """
     Computes the steady-state distribution directly from the spectrum of a given Laplacian matrix. This function works for a linear framework graph of any size.
     """
