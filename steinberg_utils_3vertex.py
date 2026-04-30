@@ -236,7 +236,7 @@ def asymmetric_autocorrelation(signal,L,tau,pi,alpha=1,beta=3):
     delta_u_star = np.diag(pi)
     
     # vectorize the Laplacian matrix multiplied by each value in the vector tau
-    list_result = list(map(lambda i: scipy.linalg.expm(L*i), tau))
+    list_result = list(map(lambda i: scipy.linalg.expm(L*i), list(tau)))
     
     # populate arrays with analytical solution to autocorrelation function
     for i in range(len(tau)):
