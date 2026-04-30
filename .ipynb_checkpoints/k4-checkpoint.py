@@ -24,59 +24,6 @@ def round_sig(x, sig_figs=4):
         return 0.0
     return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
 
-def eq_params_k4():
-    """
-    Samples equilibrium parameter sets for a 4-state single-cycle graph
-    (k12, k23, k34, k41) and (k21, k32, k43, k14), ensuring zero cycle affinity.
-
-    Returns
-    -------
-    labels_f : list of 4 floats
-        Forward rates: [k12, k23, k34, k41]
-    labels_r : list of 4 floats
-        Reverse rates: [k21, k32, k43, k14]
-    """
-
-    # Sample 7 of the 8 parameters freely
-    k12 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-    k23 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-    k34 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-    k41 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-
-    k21 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-    k32 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-    k43 = round_sig(10 ** np.random.uniform(-3, 3), sig_figs=4)
-
-    # Solve for k14 to make the cycle affinity zero
-    # A(C) = log[(k12 k23 k34 k41)/(k21 k32 k43 k14)] = 0 → solve for k14
-    k14 = (k12 * k23 * k34 * k41) / (k21 * k32 * k43)
-
-    labels_f = [k12, k23, k34, k41]
-    labels_r = [k21, k32, k43, k14]
-
-    return labels_f, labels_r
-
-def lap_k4(labels_f, labels_r):
-    """
-    Computes the Laplacian matrix for a 4-state single-cycle graph
-    (k12, k23, k34, k41) and (k21, k32, k43, k14), ensuring zero cycle affinity.
-
-    Returns
-    -------
-    labels_f : list of 4 floats
-        Forward rates: [k12, k23, k34, k41]
-    labels_r : list of 4 floats
-        Reverse rates: [k21, k32, k43, k14]
-    """
-    
-    # labels_f = k12, k23, k34, k41
-    k12, k23, k34, k41 = labels_f[0], labels_f[1], labels_f[2], labels_f[3]
-    # labels_r = k21, k32, k43, k14
-    k21, k32, k43, k14 = labels_r[0], labels_r[1], labels_r[2], labels_r[3]
-    
-    lap = np.array([[-k14-k12, k21, 0, k41], [k12, -k21-k23, k32, 0], [0, k23, -k32-k34, k43], [k14, 0, k34, -k41-k43]],dtype=float)
-    
-    return lap
 
 def pi_dist(lap):
     """

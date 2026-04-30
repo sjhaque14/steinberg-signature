@@ -130,9 +130,27 @@ def numerical_area(t,t_rev, tau):
 
 ## analytical area calculation ##
 
-# get full spectrum for a graph Laplacian
-
 def spectrum_any(lap, tol=1e-12):
+    """
+    Compute the full spectrum of the Laplacian matrix
+
+    Parameters
+    ----------
+    lap : NxN array
+        column-based Laplacian matrix of linear framework graph with N vertices
+    
+    Returns
+    -------
+    lambdas : 1D array
+        sorted array of eigenvalues of lap from smallest to largest
+
+    w_i : NxN array
+        sorted array of left eigenvectors of lap (each eigenvector is a row)
+
+    z_i : NxN array
+        sorted array of right eigenvectors of lap (each eigenvector is a column)
+    
+    """
     symmetric = np.allclose(lap, lap.T, atol=tol)
     
     eigvals_u, l_eigvecs_u, r_eigvecs_u = scipy.linalg.eig(lap, left=True, right=True)
@@ -154,12 +172,18 @@ def spectrum_any(lap, tol=1e-12):
     return lambdas, w_i, z_i
 
 def normalization_factors(w_i, z_i):
+    """
+    Compute the normalization factors for left and right eigenvectors of lap
+    """
     r_i = np.zeros(z_i.shape[1], dtype=complex)  # one factor per eigenpair
     for k in range(z_i.shape[1]):
         r_i[k] = w_i[k,:] @ z_i[:, k]
     return r_i
 
 def projection_matrices(w_i, z_i, r):
+    """
+    Compute projection matrices
+    """
     N = z_i.shape[0]
     m = z_i.shape[1]  # number of eigenpairs
     Lk_list = []
@@ -171,15 +195,17 @@ def projection_matrices(w_i, z_i, r):
     return Lk_list
 
 def B_matrix(lambdas, Lk_list, delta_u_star):
+    """
+    Compute B(G) matrix
+    """
     N = delta_u_star.shape[0]
     # skip k=0 since lambdas[0] is zero for Laplacian
-    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(0, N-2))
+    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(1, N))
     return Bsum @ delta_u_star
 
 def skew_symmetric_area(signal, B, alpha=1,beta=3):
     """
-    Computes the Steinberg signature / area for given vectors S_alpha, S_beta
-    and the operator B(G).
+    Computes the Steinberg signature / area for given vectors S_alpha, S_beta and the operator B(G).
     """
     # define the signal vectors
     s_t = np.array([signal],dtype=float) # row vector
@@ -191,6 +217,9 @@ def skew_symmetric_area(signal, B, alpha=1,beta=3):
     return area
 
 def steinberg_analytical_area(signal,lap,alpha=1,beta=3):
+    """
+    Compute the analytical area between two autocorrelation functions from Eq. 33
+    """
     lambdas, w_i, z_i = spectrum_any(lap)
     r_i = normalization_factors(w_i, z_i)
     Lk_list = projection_matrices(w_i, z_i, r_i)
@@ -200,5 +229,50 @@ def steinberg_analytical_area(signal,lap,alpha=1,beta=3):
     area = skew_symmetric_area(signal, B, alpha=1,beta=3)
 
     return area.real.item()
+
+## Sanity checks ##
+
+def is_zero_at_eq(lap, signal, alpha=1, beta=3,tol=1e-6):
+    """
+    Equilibrium check: is the area zero when the affinity is zero?
+    """
+    
+    area = steinberg_analytical_area(signal,lap,alpha,beta)
+    
+    if np.abs(area) > tol:
+        raise ValueError(
+            f"Steinberg signature is non-zero at equilibrium: {area:.6e}\n"
+            f"Check equilibrium initialization and B_matrix range."
+        )
+    return True
+
+def check_Lk(lap):
+    "Sanity check: Does the sum of all L^k matrices = I?"
+    lambdas, w_i, z_i = spectrum_any(lap)
+    r_i = normalization_factors(w_i, z_i)
+    Lk_list = projection_matrices(w_i, z_i, r_i)
+    N = len(Lk_list)
+    if np.allclose(sum(Lk_list), np.eye(N)):
+    return True
+
+def check_analytical_numerical_consistency(signal, lap, tau, alpha=1, beta=3, tol=1e-4):
+    """
+    Sanity check: analytical B(G) formula and numerical trapezoidal integration
+    should give the same Steinberg signature.
+    """
+    analytical = steinberg_analytical_area(signal, lap, alpha, beta)
+    a_13, a_31 = asymmetric_autocorrelation(signal, lap, tau, alpha, beta)
+    numerical = numerical_area(a_13, a_31, tau)
+    
+    rel_error = np.abs(analytical - numerical) / (np.abs(numerical) + 1e-15)
+    
+    if not np.isclose(analytical, numerical, rtol=tol):
+        raise ValueError(
+            f"Analytical and numerical Steinberg signatures disagree:\n"
+            f"  analytical = {analytical:.6e}\n"
+            f"  numerical  = {numerical:.6e}\n"
+            f"  relative error = {rel_error:.3e}"
+        )
+    return True
 
 
