@@ -64,7 +64,7 @@ def asymmetric_autocorrelation(signal,lap,tau,alpha=1,beta=3):
     signal : 1D array
         vector of possible values of signal S = (S(1), ..., S(N))
         
-    L : NxN array
+    lap : NxN array
         column-based Laplacian matrix of linear framework graph with N vertices
     
     tau : 1D array
@@ -109,29 +109,24 @@ def asymmetric_autocorrelation(signal,lap,tau,alpha=1,beta=3):
 
 def numerical_area(t,t_rev, tau):
     """
-    Calculates the analytical solution for forward and reverse higher-order autocorrelation functions for a particular Laplacian matrix
+    Calculates the area between asymmetric autocorrelation functions using Numpy's trapezoidal area formular
     
     Parameters
     ----------
-    signal : 1D array
-        possible values of signal (which is a state function on the Markov process)
-    L : NxN array
-        column-based Laplacian matrix of linear framework graph with N vertices
-    tau : 1D array
-        range of intervals between values of signal taken by system
-    alpha : scalar
-        exponent applied to signal
-    beta : scalar
-        exponent applied to transpose of signal
-    
-    Returns
-    -------
     t : 1D array
         forward autocorrelation function values
     t_rev : 1D array
         reverse autocorrelation function values
+    tau : 1D array
+        range of intervals between values of signal taken by system
+    
+    Returns
+    -------
+    area : 1D array
+        numerical area between t and t_rev
     """
-    return np.abs(np.trapz(t, tau)-np.trapz(t_rev, tau))
+    area = np.abs(np.trapz(t, tau)-np.trapz(t_rev, tau))
+    return area
 
 ## analytical area calculation ##
 
