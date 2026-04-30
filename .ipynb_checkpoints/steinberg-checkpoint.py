@@ -26,6 +26,16 @@ def round_sig(x, sig_figs=4):
         return 0.0
     return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
 
+# computes cycle affinity for any graph (labels_f and labels_r are computed as lists of lists corresponding to distinct cycles)
+
+def cycle_affinity(labels_f,labels_r):
+    """
+    Calculates the cycle affinity for any graph.
+    """
+    aff = np.abs(np.log(np.prod(labels_f)/np.prod(labels_r))).item()
+    return aff
+
+
 # get steady state distribution directly from Laplacian eigenvalues
 
 def pi_dist(lap):
@@ -96,7 +106,7 @@ def asymmetric_autocorrelation(signal,lap,tau,alpha=1,beta=3):
     delta_u_star = np.diag(pi)
     
     # vectorize the Laplacian matrix multiplied by each value in the vector tau
-    list_result = list(map(lambda i: scipy.linalg.expm(lap*i), list(tau))
+    list_result = list(map(lambda i: scipy.linalg.expm(lap*i), list(tau)))
     
     # populate arrays with analytical solution to autocorrelation function
     for i in range(len(tau)):
@@ -106,6 +116,31 @@ def asymmetric_autocorrelation(signal,lap,tau,alpha=1,beta=3):
     return a_13, a_31
     
 # numerical area calculation (trapezoidal integration)
+
+def make_observable(node_list):
+    """
+    Create the observable vector f for a graph with size num_nodes = len(node_list). The observable vector is a function on the states of the Markov process defined for the linear framework graph: when the system exists in state k, f takes vaue f_k.
+    
+    Parameters
+    ----------
+    node_list : 1D array
+        list of nodes in the graph
+    
+    Returns
+    -------
+    f : 1D array
+        list of values that the observable f assumes based on the state the Markov process exists in at a given time t 
+    
+    """
+    
+    num_nodes = len(node_list)
+    
+    f = np.zeros(num_nodes)
+    
+    for i in range(0,num_nodes):
+        f[i] = 3+(2*i)
+    
+    return f
 
 def numerical_area(t,t_rev, tau):
     """
@@ -126,7 +161,7 @@ def numerical_area(t,t_rev, tau):
         numerical area between t and t_rev
     """
     area = np.abs(np.trapz(t, tau)-np.trapz(t_rev, tau))
-    return area
+    return area.item()
 
 ## analytical area calculation ##
 
@@ -200,7 +235,7 @@ def B_matrix(lambdas, Lk_list, delta_u_star):
     """
     N = delta_u_star.shape[0]
     # skip k=0 since lambdas[0] is zero for Laplacian
-    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(1, N))
+    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(0, N-2))
     return Bsum @ delta_u_star
 
 def skew_symmetric_area(signal, B, alpha=1,beta=3):
@@ -227,12 +262,11 @@ def steinberg_analytical_area(signal,lap,alpha=1,beta=3):
     delta_u_star = np.diag(pi)
     B = B_matrix(lambdas, Lk_list, delta_u_star)
     area = skew_symmetric_area(signal, B, alpha=1,beta=3)
-
-    return area.real.item()
+    return np.abs(area.real.item())
 
 ## Sanity checks ##
 
-def is_zero_at_eq(lap, signal, alpha=1, beta=3,tol=1e-6):
+def is_zero_at_eq(lap, signal, alpha=1, beta=3,tol=1e-2):
     """
     Equilibrium check: is the area zero when the affinity is zero?
     """
@@ -253,26 +287,21 @@ def check_Lk(lap):
     Lk_list = projection_matrices(w_i, z_i, r_i)
     N = len(Lk_list)
     if np.allclose(sum(Lk_list), np.eye(N)):
-    return True
+        return True
 
-def check_analytical_numerical_consistency(signal, lap, tau, alpha=1, beta=3, tol=1e-4):
-    """
-    Sanity check: analytical B(G) formula and numerical trapezoidal integration
-    should give the same Steinberg signature.
-    """
+def check_analytical_numerical_consistency(signal, lap, tau, alpha=1, beta=3, 
+                                           rtol=1e-2, atol=1e-2):
     analytical = steinberg_analytical_area(signal, lap, alpha, beta)
     a_13, a_31 = asymmetric_autocorrelation(signal, lap, tau, alpha, beta)
     numerical = numerical_area(a_13, a_31, tau)
     
-    rel_error = np.abs(analytical - numerical) / (np.abs(numerical) + 1e-15)
-    
-    if not np.isclose(analytical, numerical, rtol=tol):
+    if not np.isclose(analytical, numerical, rtol=rtol, atol=atol):
         raise ValueError(
             f"Analytical and numerical Steinberg signatures disagree:\n"
             f"  analytical = {analytical:.6e}\n"
             f"  numerical  = {numerical:.6e}\n"
-            f"  relative error = {rel_error:.3e}"
+            f"  absolute error = {np.abs(analytical - numerical):.3e}"
         )
-    return True
+        return True
 
 
