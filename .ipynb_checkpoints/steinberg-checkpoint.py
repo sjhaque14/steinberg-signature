@@ -60,7 +60,7 @@ def define_tau_range(L, max_points=500, cap_factor=10.0):
     
     # set upper bound but don’t let it explode
     tau_max = min(cap_factor/lambda_1, 100.0)   # never longer than 100 time-units
-    tau = np.linspace(0.01, tau_max, num=max_points)
+    tau = np.linspace(0.0, tau_max, num=max_points)
     return tau, tau_max
 
 # analytical autocorrelation function from Eq. 21 in paper
@@ -142,7 +142,7 @@ def make_observable(node_list):
     
     return f
 
-def numerical_area(t,t_rev, tau):
+def numerical_area(t, t_rev, tau):
     """
     Calculates the area between asymmetric autocorrelation functions using Numpy's trapezoidal area formular
     
@@ -160,7 +160,7 @@ def numerical_area(t,t_rev, tau):
     area : 1D array
         numerical area between t and t_rev
     """
-    area = np.abs(np.trapz(t, tau)-np.trapz(t_rev, tau))
+    area = np.abs(np.trapezoid(t, tau)-np.trapezoid(t_rev, tau))
     return area.item()
 
 ## analytical area calculation ##
@@ -235,7 +235,7 @@ def B_matrix(lambdas, Lk_list, delta_u_star):
     """
     N = delta_u_star.shape[0]
     # skip k=0 since lambdas[0] is zero for Laplacian
-    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(0, N-2))
+    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(0, N-1))
     return Bsum @ delta_u_star
 
 def skew_symmetric_area(signal, B, alpha=1,beta=3):

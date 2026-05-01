@@ -277,5 +277,5 @@ def numerical_area(t, t_rev, tau):
     area : 1D array
         numerical area between t and t_rev
     """
-    area = np.abs(np.trapz(t - t_rev, tau))
+    area = np.abs(np.trapezoid(t, tau)-np.trapezoid(t_rev, tau))
     return area.item()
