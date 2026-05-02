@@ -8,23 +8,41 @@ import scipy.linalg
 
 def round_sig(x, sig_figs=4):
     """
-    Rounds a number to a given number of significant figures.
+    Rounds a number or array to a given number of significant figures.
+    """
+    def _round(x):
+        if x == 0:
+            return 0.0
+        return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
+    
+    vect = np.vectorize(_round)
+    return vect(x).item() if np.ndim(x) == 0 else vect(x)
+
+def random_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
+    """
+    Randomly samples transition rates for any graph which do not necessarily satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val).
     
     Parameters
     ----------
-    x : float
-        number to round
-        
-    sig_figs : integer (default=4)
-        number of sig figs to round to
-        
+    min_val : scalar
+        minimum value of sampling range (default=-3)
+    max_val : scalar
+        maximum value of sampling range (default=3)
+    num_params: integer
+        number of transition rates in graph (default=6)
+               
     Returns
-    ----------
-    x rounded to the desired number of significant figures
+    -------
+    params : 1D array
+             transition rates
     """
-    if x == 0:
-        return 0.0
-    return round(x, sig_figs - int(np.floor(np.log10(abs(x)))) - 1)
+    
+    params = np.zeros(num_params)
+    
+    params[:] = 10**(np.random.uniform(min_val,max_val, size = num_params))
+    
+    return round_sig(params, sig_figs)
+
 
 # computes cycle affinity for any graph (labels_f and labels_r are computed as lists of lists corresponding to distinct cycles)
 

@@ -56,7 +56,7 @@ def equilibrium_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
 
 def random_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
     """
-    Randomly samples transition rates for a 3-vertex graph, K, which do not necessarily satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val).
+    Randomly samples transition rates for any graph which do not necessarily satisfy detailed balance. These parameters are defined as 10^x, where x is randomly drawn from the uniform distribution on (min_val, max_val).
     
     Parameters
     ----------
