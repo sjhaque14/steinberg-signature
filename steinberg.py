@@ -307,8 +307,14 @@ def check_Lk(lap):
     if np.allclose(sum(Lk_list), np.eye(N)):
         return True
 
+def check_symmetric(a, rtol=1e-05, atol=1e-08):
+    "Is B(G) symmetric or not?"
+    return np.allclose(a, a.T, rtol=rtol, atol=atol)
+
 def check_analytical_numerical_consistency(signal, lap, tau, alpha=1, beta=3, 
                                            rtol=1e-2, atol=1e-2):
+    "Sanity check: does the analytical area match the numerical area?"
+    
     analytical = steinberg_analytical_area(signal, lap, alpha, beta)
     a_13, a_31 = asymmetric_autocorrelation(signal, lap, tau, alpha, beta)
     numerical = numerical_area(a_13, a_31, tau)
