@@ -48,7 +48,7 @@ def random_parameters(min_val=-3,max_val=3,num_params=6,sig_figs=4):
 
 def cycle_affinity(labels_f,labels_r):
     """
-    Calculates the cycle affinity for any graph.
+    Calculates the cycle affinity for a single cycle in any graph.
     """
     aff = np.abs(np.log(np.prod(labels_f)/np.prod(labels_r))).item()
     return aff
@@ -67,7 +67,7 @@ def pi_dist(lap):
 
 # set a range for the tau values to compute autocorrelation functions
 
-def define_tau_range(L, max_points=500, cap_factor=10.0):
+def define_tau_range(L, max_points=500, cap_factor=10.0, tau_cap=1000.0):
     """
     Computes the appropriate tau range based on the mixing time of the Markov process specified by the graph G. This function works for a linear framework graph of any size.
     """
@@ -77,7 +77,12 @@ def define_tau_range(L, max_points=500, cap_factor=10.0):
     lambda_1 = eigs[1]
     
     # set upper bound but don’t let it explode
-    tau_max = min(cap_factor/lambda_1, 100.0)   # never longer than 100 time-units
+    tau_max = cap_factor / lambda_1
+    if tau_max > tau_cap:
+        print(f"warning: tau_max {tau_max:.1f} exceeds cap {tau_cap} "
+              f"(spectral gap {lambda_1:.2e}); integral will be truncated")
+        tau_max = tau_cap
+        
     tau = np.linspace(0.0, tau_max, num=max_points)
     return tau, tau_max
 
@@ -253,7 +258,7 @@ def B_matrix(lambdas, Lk_list, delta_u_star):
     """
     N = delta_u_star.shape[0]
     # skip k=0 since lambdas[0] is zero for Laplacian
-    Bsum = sum((1/lambdas[k]) * Lk_list[k] for k in range(0, N-1))
+    Bsum = sum((-1/lambdas[k]) * Lk_list[k] for k in range(0, N-1))
     return Bsum @ delta_u_star
 
 def skew_symmetric_area(signal, B, alpha=1,beta=3):
